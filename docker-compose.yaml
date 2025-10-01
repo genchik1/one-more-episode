@@ -5,6 +5,7 @@ services:
     container_name: redis
     volumes:
       - redis_data:/data
+    network_mode: host
 
   api:
     build: .

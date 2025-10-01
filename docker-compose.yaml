@@ -5,6 +5,8 @@ services:
     container_name: redis
     volumes:
       - redis_data:/data
+    networks:
+      - ome
 
   api:
     build: .
@@ -15,6 +17,8 @@ services:
       - redis
     env_file:
       - .common.env
+    networks:
+      - ome
 
   save_kp_series:
     image: my-app:latest
@@ -24,6 +28,8 @@ services:
       - redis
     env_file:
       - .common.env
+    networks:
+      - ome
 
   bot:
     image: my-app:latest
@@ -33,6 +39,11 @@ services:
       - redis
     env_file:
       - .common.env
+    networks:
+      - ome
 
 volumes:
   redis_data:
+
+networks:
+  ome:

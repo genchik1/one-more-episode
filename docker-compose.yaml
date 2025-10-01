@@ -8,6 +8,7 @@ services:
 
   api:
     build: .
+    image: my-app:latest
     command: bash -c "python store.py api"
     restart: unless-stopped
     depends_on:
@@ -19,7 +20,7 @@ services:
       - 8.8.4.4
 
   save_kp_series:
-    build: .
+    image: my-app:latest
     command: bash -c "python store.py save-kp-series"
     restart: unless-stopped
     depends_on:

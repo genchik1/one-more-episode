@@ -15,8 +15,7 @@ services:
       - redis
     env_file:
       - .common.env
-    networks:  # временное решение
-      - host
+    network_mode: host   # временное решение
 
   save_kp_series:
     image: my-app:latest
@@ -26,8 +25,7 @@ services:
       - redis
     env_file:
       - .common.env
-    networks:   # временное решение
-      - host
+    network_mode: host   # временное решение
 
 volumes:
   redis_data:

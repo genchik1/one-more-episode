@@ -14,6 +14,11 @@ container.init_resources()
 container.wire(modules=[__name__])
 
 
+@router.get("/health")
+async def health() -> dict[str, str]:
+    return {"status": "ok"}
+
+
 @router.get("/collection/{slug}")
 async def get_collection(
     slug: KpCollections,

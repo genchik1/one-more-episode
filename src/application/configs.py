@@ -1,6 +1,7 @@
 from src.application import stages
 from src.application.pipeline import Pipeline
 from src.domain import repositories
+from src.domain.logger import ILogger
 from src.domain.models import ItemsCollection
 
 
@@ -19,8 +20,9 @@ def pipeline_get_collection(cache_repository: repositories.IDbRepository, collec
 
 
 def pipeline_get_onboarding_v1(
-    cache_repository: repositories.IDbRepository, file_repository: repositories.IFileRepository
+    logger: ILogger, cache_repository: repositories.IDbRepository, file_repository: repositories.IFileRepository
 ) -> Pipeline:
+    logger.info("run onboarding pipeline")
     features = ["id", "name", "year", "rating", "short_description", "poster"]
     min_rating = 6.0
     name = "onboarding_v1"

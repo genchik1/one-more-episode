@@ -10,7 +10,6 @@ from src.interface.api.dtos import LikeRequest
 
 router = APIRouter()
 container = StoreContainer()
-container.init_resources()
 container.wire(modules=[__name__])
 
 

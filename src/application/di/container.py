@@ -13,7 +13,7 @@ class StoreContainer(containers.DeclarativeContainer):
     logger = providers.Factory(StructuredLogger, name="main")
 
     kinopoisk_api_client = providers.Resource(init_kinopoisk_api)
-    redis_client = providers.Resource(init_redis_media_items)
+    redis_client = providers.Resource(init_redis_media_items, logger=logger)
 
     kinopoisk_repository = providers.Factory(repositories.KinopoiskRepository, kinopoisk_api_client)
     redis_repository = providers.Factory(repositories.RedisRepository, redis_client)
@@ -40,6 +40,7 @@ class StoreContainer(containers.DeclarativeContainer):
     )
     get_onboarding_collection_v1_pipeline = providers.Factory(
         configs.pipeline_get_onboarding_v1,
+        logger=logger,
         cache_repository=redis_repository,
         file_repository=onboarding_json_file_repository,
     )

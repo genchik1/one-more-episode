@@ -8,7 +8,6 @@ from src.consts import PROJECT_ROOT
 
 frontend = APIRouter()
 container = StoreContainer()
-container.init_resources()
 container.wire(modules=[__name__])
 
 templates = Jinja2Templates(directory=PROJECT_ROOT.joinpath("templates"))

@@ -2,6 +2,7 @@ from collections.abc import Callable
 
 from src.consts import COLLECTIONS
 from src.domain import pipeline, repositories
+from src.domain.logger import ILogger
 from src.domain.models import ItemFeatures, ItemsCollection
 from src.infrastructure.settings import KinopoiskConfig
 
@@ -11,11 +12,13 @@ class KinopoiskDataLoaderService:
 
     def __init__(
         self,
+        logger: ILogger,
         kinopoisk_repository: repositories.IKinopoiskRepository,
         cache_repository: repositories.IDbRepository,
         file_repository: repositories.IFileRepository,
         callable_pipeline_func: Callable[[list[ItemFeatures]], pipeline.IPipelineBuilder],
     ) -> None:
+        self._logger = logger
         self._kinopoisk_repo = kinopoisk_repository
         self._cache_repository = cache_repository
         self._file_repository = file_repository
@@ -35,8 +38,10 @@ class KinopoiskDataLoaderService:
         await self._cache_repository.save_collection(collection)
 
     async def load_series_info(self) -> None:
+        self._logger.info("Start load series info from kp")
         while True:
             page = self.get_actual_page_number()
+            self._logger.info(f"page: {page} >>")
             media_item_list = await self._kinopoisk_repo.load_series(
                 self._config.base_url,
                 {

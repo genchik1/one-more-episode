@@ -14,5 +14,6 @@ class KinopoiskConfig(BaseSettings):
 
 
 class RedisConfig(BaseSettings):
+    host: str = Field(default="localhost", alias="REDIS_HOST")
     port: int = 6379
     media_item_db: int = 0

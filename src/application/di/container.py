@@ -5,9 +5,13 @@ from src.application.services import KinopoiskDataLoaderService
 from src.consts import PROJECT_DOCS_PATH
 from src.infrastructure import repositories
 from src.infrastructure.external.clients import init_kinopoisk_api, init_redis_media_items
+from src.infrastructure.log import StructuredLogger, setup_logging
 
 
 class StoreContainer(containers.DeclarativeContainer):
+    logging_setup = providers.Resource(setup_logging)
+    logger = providers.Factory(StructuredLogger, name="main")
+
     kinopoisk_api_client = providers.Resource(init_kinopoisk_api)
     redis_client = providers.Resource(init_redis_media_items)
 
@@ -19,6 +23,7 @@ class StoreContainer(containers.DeclarativeContainer):
 
     kinopoisk_data_loader_service = providers.Factory(
         KinopoiskDataLoaderService,
+        logger=logger,
         kinopoisk_repository=kinopoisk_repository,
         cache_repository=redis_repository,
         file_repository=kp_save_info_file_repository,

@@ -3,3 +3,4 @@ __pycache__
 .venv
 docs/kinopoisk_info.txt
 .passwords
+.common.env

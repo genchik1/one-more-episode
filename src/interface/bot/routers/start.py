@@ -9,6 +9,7 @@ from src.interface.settings import TG_CONF
 
 start_router = Router()
 container = StoreContainer()
+container.init_resources()
 container.wire(modules=[__name__])
 
 

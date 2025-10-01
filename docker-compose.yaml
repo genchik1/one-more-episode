@@ -22,27 +22,27 @@ services:
     ports:
       - '8000:8000'
 
-  save_kp_series:
-    image: my-app:latest
-    command: bash -c "python store.py save-kp-series"
-    restart: unless-stopped
-    depends_on:
-      - redis
-    env_file:
-      - .common.env
-    networks:
-      - ome
-
-  bot:
-    image: my-app:latest
-    command: bash -c "python store.py bot"
-    restart: unless-stopped
-    depends_on:
-      - redis
-    env_file:
-      - .common.env
-    networks:
-      - ome
+#  save_kp_series:
+#    image: my-app:latest
+#    command: bash -c "python store.py save-kp-series"
+#    restart: unless-stopped
+#    depends_on:
+#      - redis
+#    env_file:
+#      - .common.env
+#    networks:
+#      - ome
+#
+#  bot:
+#    image: my-app:latest
+#    command: bash -c "python store.py bot"
+#    restart: unless-stopped
+#    depends_on:
+#      - redis
+#    env_file:
+#      - .common.env
+#    networks:
+#      - ome
 
   nginx:
     image: nginx:alpine

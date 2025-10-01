@@ -15,5 +15,14 @@ services:
     env_file:
       - .common.env
 
+  save_kp_series:
+    build: .
+    command: bash -c "python store.py save-kp-series"
+    restart: unless-stopped
+    depends_on:
+      - redis
+    env_file:
+      - .common.env
+
 volumes:
   redis_data:

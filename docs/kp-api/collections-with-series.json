@@ -1,0 +1,112 @@
+{
+  "docs": [
+    {
+      "slug": "series_about_vampires",
+      "category": "Сериалы",
+      "cover": {
+        "url": "https://image.openmoviedb.com/kinopoisk-images/10900341/1a43fcb9-94bb-4728-92f9-c74c5faf399b/orig",
+        "previewUrl": "https://image.openmoviedb.com/kinopoisk-images/10900341/1a43fcb9-94bb-4728-92f9-c74c5faf399b/x1000"
+      },
+      "createdAt": "2025-04-01T10:15:46.707Z",
+      "moviesCount": 38,
+      "name": "Сериалы про вампиров",
+      "updatedAt": "2025-04-01T10:15:47.169Z",
+      "id": "67ebbcd25da2d4ce280a5d23"
+    },
+    {
+      "slug": "best_mini_serial",
+      "category": "Сериалы",
+      "cover": {
+        "url": "https://avatars.mds.yandex.net/get-bunker/128809/3a37030327f49d12eba1218826a447fe3a9d1c7b/orig",
+        "previewUrl": "https://avatars.mds.yandex.net/get-bunker/128809/3a37030327f49d12eba1218826a447fe3a9d1c7b/x1000"
+      },
+      "createdAt": "2025-04-01T10:15:46.707Z",
+      "moviesCount": 100,
+      "name": "Лучшие сериалы мини-формата",
+      "updatedAt": "2025-04-01T10:15:47.169Z",
+      "id": "67ebbcd25da2d4ce280a5d22"
+    },
+    {
+      "slug": "popular-series",
+      "category": "Сериалы",
+      "cover": {
+        "url": "https://image.openmoviedb.com/kinopoisk-images/10703959/7d1793e4-6217-4a76-89e1-c8da8d652797/orig",
+        "previewUrl": "https://image.openmoviedb.com/kinopoisk-images/10703959/7d1793e4-6217-4a76-89e1-c8da8d652797/x1000"
+      },
+      "createdAt": "2025-04-01T10:15:46.707Z",
+      "moviesCount": 1000,
+      "name": "Популярные сериалы",
+      "updatedAt": "2025-04-01T10:15:47.169Z",
+      "id": "67ebbcd25da2d4ce280a5d21"
+    },
+    {
+      "slug": "100_greatest_TVseries",
+      "category": "Сериалы",
+      "cover": {
+        "url": "https://avatars.mds.yandex.net/get-bunker/128809/42390deeca7c1c280f477a247083d9e8fcd6be2b/orig",
+        "previewUrl": "https://avatars.mds.yandex.net/get-bunker/128809/42390deeca7c1c280f477a247083d9e8fcd6be2b/x1000"
+      },
+      "createdAt": "2025-04-01T10:15:46.707Z",
+      "moviesCount": 100,
+      "name": "100 великих сериалов XXI века",
+      "updatedAt": "2025-04-01T10:15:47.169Z",
+      "id": "67ebbcd25da2d4ce280a5d20"
+    },
+    {
+      "slug": "hbo_best",
+      "category": "Сериалы",
+      "cover": {
+        "url": "https://image.openmoviedb.com/kinopoisk-images/10768063/a7de5bb6-38b1-45b7-a9fe-6439c95fdc2f/orig",
+        "previewUrl": "https://image.openmoviedb.com/kinopoisk-images/10768063/a7de5bb6-38b1-45b7-a9fe-6439c95fdc2f/x1000"
+      },
+      "createdAt": "2025-04-01T10:15:46.707Z",
+      "moviesCount": 30,
+      "name": "Шедевры HBO",
+      "updatedAt": "2025-04-01T10:15:47.169Z",
+      "id": "67ebbcd25da2d4ce280a5d1f"
+    },
+    {
+      "slug": "series-top250",
+      "category": "Сериалы",
+      "cover": {
+        "url": "https://avatars.mds.yandex.net/get-bunker/118781/02f27f401e650b75c4d42ed9f15e999392d33615/orig",
+        "previewUrl": "https://avatars.mds.yandex.net/get-bunker/118781/02f27f401e650b75c4d42ed9f15e999392d33615/x1000"
+      },
+      "createdAt": "2025-04-01T10:15:46.707Z",
+      "moviesCount": 250,
+      "name": "250 лучших сериалов",
+      "updatedAt": "2025-04-01T10:15:47.169Z",
+      "id": "67ebbcd25da2d4ce280a5d1e"
+    },
+    {
+      "slug": "audiodescription",
+      "category": "Сериалы",
+      "cover": {
+        "url": "https://image.openmoviedb.com/kinopoisk-images/10835644/69ef1d94-0125-4fee-98be-67929c7db555/orig",
+        "previewUrl": "https://image.openmoviedb.com/kinopoisk-images/10835644/69ef1d94-0125-4fee-98be-67929c7db555/x1000"
+      },
+      "createdAt": "2025-04-01T10:15:46.707Z",
+      "moviesCount": 109,
+      "name": "Фильмы и сериалы с тифлокомментариями",
+      "updatedAt": "2025-04-01T10:15:47.169Z",
+      "id": "67ebbcd25da2d4ce280a5cf9"
+    },
+    {
+      "slug": "hearing_impairment",
+      "category": "Сериалы",
+      "cover": {
+        "url": null,
+        "previewUrl": null
+      },
+      "createdAt": "2025-04-01T10:15:46.707Z",
+      "moviesCount": 119,
+      "name": "Фильмы и сериалы с субтитрами для людей с особенностями слуха",
+      "updatedAt": "2025-04-01T10:15:47.169Z",
+      "id": "67ebbcd25da2d4ce280a5cf8"
+    }
+  ],
+  "total": 8,
+  "limit": 250,
+  "page": 1,
+  "pages": 1
+}

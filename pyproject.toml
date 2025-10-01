@@ -1,0 +1,76 @@
+[project]
+name = "one-more-episode"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiogram>=3.22.0",
+    "aiohttp>=3.12.15",
+    "click>=8.2.1",
+    "dependency-injector>=4.48.1",
+    "fastapi>=0.116.2",
+    "granian>=2.5.3",
+    "jinja2>=3.1.6",
+    "orjson>=3.11.3",
+    "pydantic>=2.11.9",
+    "pydantic-settings>=2.11.0",
+    "redis>=6.4.0",
+    "requests>=2.32.5",
+    "uvicorn>=0.37.0",
+    "uvloop>=0.21.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "ruff>=0.13.0",
+]
+
+[tool.ruff]
+line-length = 120
+exclude = [
+    "__pycache__",
+    ".venv/",
+]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "PLR0913",
+    "PLW2901",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "RUF012",
+    "ANN401",
+    "ANN401",
+    "G004",
+    "G201",
+    "EM101",
+    "EM102",
+    "RET504",
+    "ISC001",
+    "PD002",
+    "N805",
+    "N815",
+    "TRY400",
+    "TRY003",
+    "TRY401",
+    "TRY201",
+    "ARG",
+    "Q",
+    "D",
+    "ERA",
+    "FBT",
+    "TD",
+    "FIX",
+    "COM",
+    "DTZ",
+    "S",
+    "PLR2004",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = 'auto'

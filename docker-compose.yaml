@@ -1,0 +1,19 @@
+services:
+  redis:
+    image: redis:6-alpine
+    restart: unless-stopped
+    container_name: redis
+    volumes:
+      - redis_data:/data
+
+  api:
+    build: .
+    command: bash -c "python store.py api"
+    restart: unless-stopped
+    depends_on:
+      - redis
+    env_file:
+      - .common.env
+
+volumes:
+  redis_data:

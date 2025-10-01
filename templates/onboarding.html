@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Онбординг</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            padding: 10px;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            width: 100%;
+            max-width: 100%;
+            transition: filter 0.3s ease, opacity 0.3s ease;
+        }
+
+        .grid.dimmed {
+            filter: brightness(0.3);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .poster {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            aspect-ratio: 2/3;
+            background: #2a2a2a;
+            cursor: pointer;
+        }
+
+        .poster:active {
+            transform: scale(0.98);
+        }
+
+        .poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+        }
+
+        .poster-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+            padding: 15px 10px 10px;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .poster-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 3px;
+            line-height: 1.2;
+        }
+
+        .poster-year {
+            font-size: 12px;
+            color: #cccccc;
+        }
+
+        .rating-buttons {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            gap: 20px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .poster:hover .rating-buttons,
+        .poster:active .rating-buttons {
+            opacity: 1;
+        }
+
+        .rating-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .rating-btn:hover {
+            transform: scale(1.1);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .rating-btn:active {
+            transform: scale(0.95);
+        }
+
+        .like-btn.active {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(255, 255, 255, 0.9);
+            color: #000;
+        }
+
+        .dislike-btn.active {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(255, 255, 255, 0.9);
+            color: #000;
+        }
+
+        .dislike-btn::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 24px;
+            height: 2px;
+            background: currentColor;
+            transform: translate(-50%, -50%) rotate(45deg);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .dislike-btn.active::after {
+            opacity: 1;
+        }
+
+        .rating-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 12px;
+        }
+
+        .poster:hover .rating-overlay,
+        .poster:active .rating-overlay {
+            opacity: 1;
+        }
+
+        /* Стили для увеличенного постера */
+        .poster-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .poster-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .poster-expanded {
+            position: relative;
+            width: 75vw;
+            max-width: 400px;
+            aspect-ratio: 2/3;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+        }
+
+        .poster-overlay.active .poster-expanded {
+            transform: scale(1);
+        }
+
+        .poster-expanded img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+
+        .poster-expanded-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.95));
+            padding: 20px 15px 15px;
+            border-radius: 0 0 16px 16px;
+        }
+
+        .poster-expanded-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .poster-expanded-year {
+            font-size: 14px;
+            color: #cccccc;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            z-index: 1002;
+        }
+
+        .close-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        .expanded-rating-buttons {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1002;
+        }
+
+        .expanded-rating-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 22px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .expanded-rating-btn.active {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(255, 255, 255, 0.9);
+            color: #000;
+        }
+
+        .expanded-dislike-btn::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 28px;
+            height: 2px;
+            background: currentColor;
+            transform: translate(-50%, -50%) rotate(45deg);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .expanded-dislike-btn.active::after {
+            opacity: 1;
+        }
+
+        /* Оптимизация для очень маленьких экранов */
+        @media (max-width: 360px) {
+            .grid {
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                gap: 10px;
+            }
+
+            body {
+                padding: 8px;
+            }
+
+            .poster-title {
+                font-size: 13px;
+            }
+
+            .rating-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 18px;
+            }
+
+            .rating-buttons {
+                gap: 16px;
+            }
+
+            .dislike-btn::after {
+                width: 20px;
+            }
+
+            .poster-expanded {
+                width: 85vw;
+                max-width: 300px;
+            }
+
+            .expanded-rating-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+            }
+        }
+
+        /* Для горизонтальной ориентации */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+            }
+
+            .poster-expanded {
+                width: 60vh;
+                max-width: none;
+            }
+        }
+
+        /* Для тач-устройств всегда показываем кнопки */
+        @media (hover: none) {
+            .rating-buttons {
+                opacity: 1;
+            }
+
+            .rating-overlay {
+                opacity: 0.3;
+            }
+
+            .rating-btn {
+                background: rgba(0, 0, 0, 0.8);
+                border-color: rgba(255, 255, 255, 0.6);
+            }
+        }
+
+        /* Плавное появление изображений */
+        .poster img {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .poster img.loaded {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+<div class="grid" id="posters-grid">
+    {% for series in series_data %}
+    <div class="poster" data-id="{{ loop.index0 }}">
+        <img src="{{ series.poster.preview_url }}" alt="{{ series.id }}" loading="lazy">
+        <div class="rating-overlay"></div>
+        <div class="rating-buttons">
+            <button class="rating-btn like-btn" data-action="like">❤️</button>
+            <button class="rating-btn dislike-btn" data-action="dislike">❤️</button>
+        </div>
+        <div class="poster-info">
+            <div class="poster-title">{{ series.name }}</div>
+            <div class="poster-year">{{ series.year }}</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Оверлей для увеличенного постера -->
+<div class="poster-overlay" id="posterOverlay">
+    <button class="close-btn" id="closeBtn">✕</button>
+    <div class="poster-expanded" id="expandedPoster">
+        <!-- Контент будет заполнен через JavaScript -->
+    </div>
+</div>
+
+<script>
+    // Данные сериалов из Jinja2
+    const seriesData = {{ series_data | tojson }};
+
+    // Объект для хранения оценок пользователя
+    const userRatings = {};
+
+    // Функция для отправки оценки на сервер
+    async function sendRatingToServer(seriesId, rating) {
+        const series = seriesData[seriesId];
+        try {
+            const response = await fetch('/api/v1/like', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    item_id: parseInt(series.id),
+                    rating: rating
+                })
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                console.log('Оценка сохранена на сервере:', result);
+            } else {
+                console.error('Ошибка сохранения оценки:', result);
+            }
+        } catch (error) {
+            console.error('Ошибка при отправке оценки:', error);
+        }
+    }
+
+    // Функция для открытия увеличенного постера
+    function openExpandedPoster(posterId) {
+        const series = seriesData[posterId];
+        console.log(`открытия увеличенного постера "${posterId}" "${seriesData[posterId]}" "${series}"`);
+        const overlay = document.getElementById('posterOverlay');
+        const expandedPoster = document.getElementById('expandedPoster');
+        const grid = document.getElementById('posters-grid');
+
+        // Заполняем контент увеличенного постера
+        expandedPoster.innerHTML = `
+            <img src="${series.poster.preview_url}" alt="${series.name}">
+            <div class="poster-expanded-info">
+                <div class="poster-expanded-title">${series.name}</div>
+                <div class="poster-expanded-year">${series.year}</div>
+            </div>
+            <div class="expanded-rating-buttons">
+                <button class="expanded-rating-btn expanded-like-btn" data-action="like">❤️</button>
+                <button class="expanded-rating-btn expanded-dislike-btn" data-action="dislike">❤️</button>
+            </div>
+        `;
+
+        // Восстанавливаем состояние рейтинга если есть
+        if (userRatings[posterId]) {
+            const activeBtn = expandedPoster.querySelector(`.expanded-${userRatings[posterId]}-btn`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+
+        // Показываем оверлей и затемняем сетку
+        overlay.classList.add('active');
+        grid.classList.add('dimmed');
+
+        // Добавляем обработчики для кнопок рейтинга в увеличенном режиме
+        setupExpandedRatingButtons(posterId);
+    }
+
+    // Функция для закрытия увеличенного постера
+    function closeExpandedPoster() {
+        const overlay = document.getElementById('posterOverlay');
+        const grid = document.getElementById('posters-grid');
+
+        overlay.classList.remove('active');
+        grid.classList.remove('dimmed');
+    }
+
+    // Настройка обработчиков для кнопок рейтинга
+    function setupRatingButtons() {
+        document.querySelectorAll('.rating-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                handleRating(this);
+            });
+        });
+    }
+
+    // Настройка обработчиков для кнопок рейтинга в увеличенном режиме
+    function setupExpandedRatingButtons(posterId) {
+        document.querySelectorAll('.expanded-rating-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                handleRating(this, posterId);
+            });
+        });
+    }
+
+    // Обработка оценки
+    function handleRating(button, posterId = null) {
+        const poster = button.closest('.poster') || document.querySelector(`.poster[data-id="${posterId}"]`);
+        const actualPosterId = posterId || poster.dataset.id;
+        const action = button.dataset.action;
+
+        // Сбрасываем активное состояние у всех кнопок этого постера
+        const allRatingBtns = document.querySelectorAll(`.poster[data-id="${actualPosterId}"] .rating-btn, .expanded-rating-btn`);
+        allRatingBtns.forEach(btn => {
+            if (btn.dataset.action === action) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Сохраняем оценку локально и отправляем на сервер
+        userRatings[actualPosterId] = action;
+        sendRatingToServer(actualPosterId, action);
+
+        console.log(`Пользователь оценил "${seriesData[actualPosterId]}": ${action}`);
+        console.log('Все оценки:', userRatings);
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        // Добавляем обработчики клика на постеры
+        document.querySelectorAll('.poster').forEach(poster => {
+            poster.addEventListener('click', function(e) {
+                if (!e.target.closest('.rating-btn')) {
+                    openExpandedPoster(this.dataset.id);
+                }
+            });
+        });
+
+        // Настраиваем кнопки рейтинга
+        setupRatingButtons();
+
+        // Закрытие по клику на оверлей
+        document.getElementById('posterOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeExpandedPoster();
+            }
+        });
+
+        // Закрытие по кнопке
+        document.getElementById('closeBtn').addEventListener('click', closeExpandedPoster);
+
+        // Закрытие по ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeExpandedPoster();
+            }
+        });
+
+        // Обработка загрузки изображений
+        const images = document.querySelectorAll('img');
+        images.forEach(img => {
+            if (img.complete) {
+                img.classList.add('loaded');
+            } else {
+                img.addEventListener('load', function() {
+                    this.classList.add('loaded');
+                });
+                img.addEventListener('error', function() {
+                    this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDMwMCA0NTAiIGZpbGw9IiMzMzMiPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY2NiIgZm9udC1zaXplPSIxNCI+UG9zdGVyIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4=';
+                    this.classList.add('loaded');
+                });
+            }
+        });
+    });
+
+    // Оптимизация для Touch-устройств
+    document.addEventListener('touchstart', function() {}, {passive: true});
+</script>
+</body>
+</html>

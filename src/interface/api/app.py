@@ -1,0 +1,11 @@
+from fastapi import FastAPI
+
+from src.interface.api.frontend import frontend
+from src.interface.api.v1 import router
+
+
+def create_app() -> FastAPI:
+    app = FastAPI()
+    app.include_router(router, prefix="/api/v1")
+    app.include_router(frontend)
+    return app

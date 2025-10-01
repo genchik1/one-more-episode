@@ -23,6 +23,9 @@ services:
       - redis
     env_file:
       - .common.env
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
 
 volumes:
   redis_data:

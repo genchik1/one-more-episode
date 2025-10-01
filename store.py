@@ -5,6 +5,7 @@ import uvicorn
 
 from src.application.di.container import StoreContainer
 from src.interface.api.app import create_app
+from src.interface.bot.main import main as bot_main
 from src.interface.scripts import save_kinopoisk_collections, save_kinopoisk_series
 
 container = StoreContainer()
@@ -37,9 +38,15 @@ def api():
     )
 
 
+@click.command()
+def bot():
+    asyncio.run(bot_main())
+
+
 run.add_command(save_kp_series)
 run.add_command(save_kp_collections)
 run.add_command(api)
+run.add_command(bot)
 
 
 if __name__ == "__main__":

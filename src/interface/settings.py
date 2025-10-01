@@ -1,11 +1,11 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
 class TgConfig(BaseSettings):
-    token: str
+    token: str = Field(alias="TG_BOT_TOKEN")
     url: str = "localhost"
     onboarding_page: str = url + "/onboarding"
-    parse_mode = "Markdown"
 
 
 TG_CONF = TgConfig()

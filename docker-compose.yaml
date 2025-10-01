@@ -5,7 +5,6 @@ services:
     container_name: redis
     volumes:
       - redis_data:/data
-    network_mode: host
 
   api:
     build: .
@@ -16,7 +15,6 @@ services:
       - redis
     env_file:
       - .common.env
-    network_mode: host   # временное решение
 
   save_kp_series:
     image: my-app:latest
@@ -26,7 +24,15 @@ services:
       - redis
     env_file:
       - .common.env
-    network_mode: host   # временное решение
+
+  bot:
+    image: my-app:latest
+    command: bash -c "python store.py bot"
+    restart: unless-stopped
+    depends_on:
+      - redis
+    env_file:
+      - .common.env
 
 volumes:
   redis_data:

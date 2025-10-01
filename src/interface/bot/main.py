@@ -6,7 +6,7 @@ from src.interface.settings import TgConfig
 
 
 async def main():
-    bot = Bot(TgConfig().token, parse_mode=ParseMode.MARKDOWN_V2)
+    bot = Bot(TgConfig().token)
     dp = Dispatcher()
     dp.include_routers(
         start_router,

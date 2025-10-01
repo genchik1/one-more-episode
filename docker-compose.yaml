@@ -15,9 +15,8 @@ services:
       - redis
     env_file:
       - .common.env
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+    networks:  # временное решение
+      - host
 
   save_kp_series:
     image: my-app:latest
@@ -27,9 +26,8 @@ services:
       - redis
     env_file:
       - .common.env
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+    networks:   # временное решение
+      - host
 
 volumes:
   redis_data:

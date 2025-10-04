@@ -26,5 +26,5 @@ async def onboarding(request: Request):
     series_data = [item.model_dump(exclude_none=True, exclude_defaults=True) for item in converted_collection]
 
     return templates.TemplateResponse(
-        "onboarding.html", {"request": request, "series_data": series_data, "title": "Онбординг"}
+        "onboarding1.html", {"request": request, "series_data": series_data, "title": "Онбординг"}
     )

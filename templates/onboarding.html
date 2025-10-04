@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="MobileOptimized" content="176"/>
+    <meta name="HandheldFriendly" content="True"/>
+    <meta name="robots" content="noindex,nofollow"/>\
+    <title></title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script> <!--Подключаем скрипт от телеграм-->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            touch-action: none;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .posters-container {
+            position: absolute;
+            display: grid;
+            grid-template-columns: repeat(6, 22vw);
+            grid-template-rows: repeat(18, 33vw);
+            gap: 3vw;
+            padding: 4vw;
+            transition: transform 0.1s ease-out;
+            width: max-content;
+            height: max-content;
+            will-change: transform;
+        }
+
+        .poster {
+            width: 22vw;
+            height: 33vw;
+            border-radius: 2vw;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            box-shadow: 0 1vw 2vw rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            padding: 1.5vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .poster-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 2vw;
+            z-index: 1;
+        }
+
+        .poster-title {
+            font-size: 3vw;
+            text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.9);
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1.5vw 2vw;
+            border-radius: 1.5vw;
+            width: 95%;
+            margin-bottom: 1vw;
+            line-height: 1.2;
+        }
+
+        .poster:active {
+            transform: scale(0.95);
+        }
+
+        .poster-expanded {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .poster-expanded.active {
+            opacity: 1;
+        }
+
+        .poster-expanded-image {
+            width: 100%;
+            height: 70vh;
+            object-fit: cover;
+        }
+
+        .poster-expanded-content {
+            flex: 1;
+            padding: 5vw;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            overflow-y: auto;
+        }
+
+        .poster-info-title {
+            font-size: 6vw;
+            margin-bottom: 4vw;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .poster-info-description {
+            font-size: 4vw;
+            margin-bottom: 5vw;
+            line-height: 1.4;
+            color: #ecf0f1;
+        }
+
+        .poster-info-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5vw;
+        }
+
+        .rating-stars {
+            color: #ffc107;
+            margin-right: 3vw;
+            font-size: 5vw;
+        }
+
+        .rating-value {
+            font-weight: bold;
+            font-size: 4.5vw;
+            color: #fff;
+        }
+
+        .poster-actions {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 6vw;
+            padding: 0 10vw;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: #fff;
+            font-size: 6vw;
+            cursor: pointer;
+            padding: 3vw;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            width: 15vw;
+            height: 15vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:active {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(0.9);
+        }
+
+        .like-btn.active {
+            background: rgba(231, 76, 60, 0.6);
+            color: #e74c3c;
+        }
+
+        .dislike-btn.active {
+            background: rgba(52, 152, 219, 0.6);
+            color: #3498db;
+        }
+
+        .bookmark-btn.active {
+            background: rgba(243, 156, 18, 0.6);
+            color: #f39c12;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 3vw;
+            right: 3vw;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            font-size: 8vw;
+            cursor: pointer;
+            width: 12vw;
+            height: 12vw;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 101;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.9);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Адаптация для разных ориентаций */
+        @media (orientation: landscape) {
+            .poster-expanded {
+                flex-direction: row;
+            }
+
+            .poster-expanded-image {
+                width: 60vw;
+                height: 100vh;
+            }
+
+            .poster-expanded-content {
+                width: 40vw;
+                height: 100vh;
+                padding: 4vw;
+            }
+
+            .poster-info-title {
+                font-size: 4vw;
+            }
+
+            .poster-info-description {
+                font-size: 2.5vw;
+            }
+
+            .action-btn {
+                font-size: 4vw;
+                width: 10vw;
+                height: 10vw;
+            }
+
+            .close-btn {
+                font-size: 5vw;
+                width: 8vw;
+                height: 8vw;
+            }
+        }
+
+        /* Для очень маленьких экранов */
+        @media (max-width: 320px) {
+            .poster {
+                width: 25vw;
+                height: 37.5vw;
+            }
+
+            .poster-title {
+                font-size: 3.5vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="posters-container" id="postersContainer">
+            {% for series in series_data %}
+            <div class="poster" data-id="{{ series.id }}">
+                <img src="{{ series.image }}" alt="{{ series.title }}" class="poster-image"
+                     onerror="this.src='https://via.placeholder.com/300x450/333/fff?text=No+Image'">
+                <div class="poster-title">{{ series.title }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="overlay" id="overlay"></div>
+
+    <script>
+        // Данные сериалов
+        const seriesData = [
+            {% for series in series_data %}
+            {
+                id: {{ series.id }},
+                title: "{{ series.title|replace('"', '\\"') }}",
+                description: "{{ series.description|replace('"', '\\"') }}",
+                rating: {{ series.rating }},
+                image: "{{ series.image }}"
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // Элементы DOM
+        const postersContainer = document.getElementById('postersContainer');
+        const overlay = document.getElementById('overlay');
+
+        // Переменные для перетаскивания
+        let isDragging = false;
+        let startX, startY;
+        let currentX = 0, currentY = 0;
+        let velocityX = 0, velocityY = 0;
+        let lastX = 0, lastY = 0;
+        let lastTime = 0;
+        let animationFrame;
+
+        // Создаем сетку 6x18 постеров
+        function createPostersGrid() {
+            postersContainer.innerHTML = '';
+
+            // Дублируем данные для заполнения сетки 6x18 (108 постеров)
+            const totalPosters = 6 * 18;
+            const repeatedData = [];
+
+            for (let i = 0; i < totalPosters; i++) {
+                const series = seriesData[i % seriesData.length];
+                repeatedData.push({...series, gridId: i});
+            }
+
+            // Создаем постеры
+            repeatedData.forEach(series => {
+                const posterElement = document.createElement('div');
+                posterElement.className = 'poster';
+                posterElement.dataset.id = series.id;
+                posterElement.dataset.gridId = series.gridId;
+
+                const posterImage = document.createElement('img');
+                posterImage.className = 'poster-image';
+                posterImage.src = series.image;
+                posterImage.alt = series.title;
+
+                const posterTitle = document.createElement('div');
+                posterTitle.className = 'poster-title';
+                posterTitle.textContent = series.title;
+
+                posterElement.appendChild(posterImage);
+                posterElement.appendChild(posterTitle);
+                postersContainer.appendChild(posterElement);
+            });
+
+            return repeatedData;
+        }
+
+        // Центрируем сетку так, чтобы центр массива был в центре экрана
+        function centerGrid() {
+            const posterWidth = 22; // vw
+            const posterHeight = 33; // vw
+            const gap = 3; // vw
+            const padding = 4; // vw
+
+            // Размеры всей сетки
+            const gridWidth = 6 * posterWidth + 5 * gap + 2 * padding;
+            const gridHeight = 18 * posterHeight + 17 * gap + 2 * padding;
+
+            // Центр сетки (между 3 и 4 колонками, 9 и 10 строками)
+            const centerX = (gridWidth / 2) - (posterWidth + gap) / 2;
+            const centerY = (gridHeight / 2) - (posterHeight + gap) / 2;
+
+            // Смещаем контейнер так, чтобы центр был в центре экрана
+            const offsetX = -centerX * window.innerWidth / 100 + (window.innerWidth / 2);
+            const offsetY = -centerY * window.innerHeight / 100 + (window.innerHeight / 2);
+
+            postersContainer.style.left = offsetX + 'px';
+            postersContainer.style.top = offsetY + 'px';
+
+            // Сбрасываем трансформацию
+            postersContainer.style.transform = 'translate(0px, 0px)';
+            currentX = 0;
+            currentY = 0;
+        }
+
+        // Функция для создания звезд рейтинга
+        function createRatingStars(rating) {
+            const fullStars = Math.floor(rating / 2);
+            const halfStar = rating % 2 >= 1 ? 1 : 0;
+            const emptyStars = 5 - fullStars - halfStar;
+
+            let starsHTML = '';
+
+            for (let i = 0; i < fullStars; i++) {
+                starsHTML += '★';
+            }
+
+            if (halfStar) {
+                starsHTML += '½';
+            }
+
+            for (let i = 0; i < emptyStars; i++) {
+                starsHTML += '☆';
+            }
+
+            return starsHTML;
+        }
+
+        let currentExpandedPoster = null;
+
+        // Обработчики событий для постеров
+        function setupPosterEvents() {
+            document.querySelectorAll('.poster').forEach(poster => {
+                poster.addEventListener('click', function(e) {
+                    // Если был драг (перемещение), не открываем постер
+                    if (Math.abs(velocityX) > 2 || Math.abs(velocityY) > 2) {
+                        return;
+                    }
+
+                    e.stopPropagation();
+                    const seriesId = parseInt(this.dataset.id);
+                    const series = seriesData.find(s => s.id === seriesId);
+
+                    if (series && !currentExpandedPoster) {
+                        expandPoster(series);
+                    }
+                });
+            });
+        }
+
+        // Функция для увеличения постера
+        function expandPoster(series) {
+            // Создаем элемент для увеличенного просмотра
+            const expandedPoster = document.createElement('div');
+            expandedPoster.className = 'poster-expanded';
+            currentExpandedPoster = expandedPoster;
+
+            // Создаем изображение
+            const expandedImage = document.createElement('img');
+            expandedImage.className = 'poster-expanded-image';
+            expandedImage.src = series.image;
+            expandedImage.alt = series.title;
+
+            // Создаем контент с информацией
+            const posterContent = document.createElement('div');
+            posterContent.className = 'poster-expanded-content';
+
+            const title = document.createElement('div');
+            title.className = 'poster-info-title';
+            title.textContent = series.title;
+
+            const description = document.createElement('div');
+            description.className = 'poster-info-description';
+            description.textContent = series.description;
+
+            const rating = document.createElement('div');
+            rating.className = 'poster-info-rating';
+
+            const stars = document.createElement('span');
+            stars.className = 'rating-stars';
+            stars.innerHTML = createRatingStars(series.rating);
+
+            const value = document.createElement('span');
+            value.className = 'rating-value';
+            value.textContent = series.rating.toFixed(1);
+
+            rating.appendChild(stars);
+            rating.appendChild(value);
+
+            // Создаем кнопки действий
+            const actions = document.createElement('div');
+            actions.className = 'poster-actions';
+
+            const likeBtn = document.createElement('button');
+            likeBtn.className = 'action-btn like-btn';
+            likeBtn.innerHTML = '👍';
+
+            const dislikeBtn = document.createElement('button');
+            dislikeBtn.className = 'action-btn dislike-btn';
+            dislikeBtn.innerHTML = '👎';
+
+            const bookmarkBtn = document.createElement('button');
+            bookmarkBtn.className = 'action-btn bookmark-btn';
+            bookmarkBtn.innerHTML = '🔖';
+
+            actions.appendChild(likeBtn);
+            actions.appendChild(dislikeBtn);
+            actions.appendChild(bookmarkBtn);
+
+            // Создаем кнопку закрытия
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-btn';
+            closeBtn.innerHTML = '×';
+
+            // Собираем контент
+            posterContent.appendChild(title);
+            posterContent.appendChild(description);
+            posterContent.appendChild(rating);
+            posterContent.appendChild(actions);
+
+            expandedPoster.appendChild(expandedImage);
+            expandedPoster.appendChild(posterContent);
+            expandedPoster.appendChild(closeBtn);
+
+            // Добавляем увеличенный постер на страницу
+            document.body.appendChild(expandedPoster);
+            overlay.classList.add('active');
+
+            // Анимация появления
+            setTimeout(() => {
+                expandedPoster.classList.add('active');
+            }, 10);
+
+            // Обработчики для кнопок действий
+            likeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.classList.toggle('active');
+                dislikeBtn.classList.remove('active');
+            });
+
+            dislikeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.classList.toggle('active');
+                likeBtn.classList.remove('active');
+            });
+
+            bookmarkBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.classList.toggle('active');
+            });
+
+            // Функция закрытия
+            function closeExpandedPoster() {
+                expandedPoster.classList.remove('active');
+                overlay.classList.remove('active');
+
+                setTimeout(() => {
+                    if (expandedPoster.parentNode) {
+                        document.body.removeChild(expandedPoster);
+                    }
+                    currentExpandedPoster = null;
+                }, 300);
+            }
+
+            // Закрытие по клику на оверлей или кнопку закрытия
+            overlay.addEventListener('click', closeExpandedPoster);
+            closeBtn.addEventListener('click', closeExpandedPoster);
+
+            // Свайп вниз для закрытия
+            let startY = 0;
+            let isSwiping = false;
+
+            expandedPoster.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+                isSwiping = true;
+            });
+
+            expandedPoster.addEventListener('touchmove', (e) => {
+                if (!isSwiping) return;
+                const currentY = e.touches[0].clientY;
+                const diff = currentY - startY;
+
+                if (diff > 50) {
+                    closeExpandedPoster();
+                    isSwiping = false;
+                }
+            });
+
+            expandedPoster.addEventListener('touchend', () => {
+                isSwiping = false;
+            });
+        }
+
+        // Функции для перетаскивания
+        function startDrag(e) {
+            isDragging = true;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            startX = clientX - currentX;
+            startY = clientY - currentY;
+            velocityX = 0;
+            velocityY = 0;
+            lastX = currentX;
+            lastY = currentY;
+            lastTime = Date.now();
+
+            cancelAnimationFrame(animationFrame);
+        }
+
+        function duringDrag(e) {
+            if (!isDragging) return;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            currentX = clientX - startX;
+            currentY = clientY - startY;
+
+            // Вычисляем скорость для инерции
+            const currentTime = Date.now();
+            const deltaTime = currentTime - lastTime;
+
+            if (deltaTime > 0) {
+                velocityX = (currentX - lastX) / deltaTime;
+                velocityY = (currentY - lastY) / deltaTime;
+            }
+
+            lastX = currentX;
+            lastY = currentY;
+            lastTime = currentTime;
+
+            postersContainer.style.transform = `translate(${currentX}px, ${currentY}px)`;
+        }
+
+        function endDrag() {
+            isDragging = false;
+
+            // Добавляем инерцию
+            if (Math.abs(velocityX) > 0.1 || Math.abs(velocityY) > 0.1) {
+                applyInertia();
+            }
+        }
+
+        function applyInertia() {
+            const friction = 0.95;
+
+            currentX += velocityX * 16;
+            currentY += velocityY * 16;
+
+            velocityX *= friction;
+            velocityY *= friction;
+
+            postersContainer.style.transform = `translate(${currentX}px, ${currentY}px)`;
+
+            if (Math.abs(velocityX) > 0.1 || Math.abs(velocityY) > 0.1) {
+                animationFrame = requestAnimationFrame(applyInertia);
+            }
+        }
+
+        // Настройка событий перетаскивания
+        function setupDragEvents() {
+            // Touch события
+            postersContainer.addEventListener('touchstart', startDrag);
+            postersContainer.addEventListener('touchmove', duringDrag);
+            postersContainer.addEventListener('touchend', endDrag);
+
+            // Mouse события (для тестирования)
+            postersContainer.addEventListener('mousedown', startDrag);
+            postersContainer.addEventListener('mousemove', duringDrag);
+            postersContainer.addEventListener('mouseup', endDrag);
+            postersContainer.addEventListener('mouseleave', endDrag);
+        }
+
+        // Предотвращаем скролл страницы
+        document.addEventListener('touchmove', (e) => {
+            if (e.target === document.body || e.target === document.documentElement) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Инициализация
+        function init() {
+            createPostersGrid();
+            setupPosterEvents();
+            setupDragEvents();
+
+            // Даем время на рендеринг, затем центрируем
+            setTimeout(() => {
+                centerGrid();
+            }, 100);
+
+            window.addEventListener('resize', centerGrid);
+        }
+
+        // Запускаем при загрузке
+        window.addEventListener('load', init);
+
+        // Инициализация Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            Telegram.WebApp.expand();
+            Telegram.WebApp.enableClosingConfirmation();
+        }
+    </script>
+</body>
+</html>

@@ -24,7 +24,11 @@ async def onboarding(request: Request):
         raise HTTPException(status_code=404, detail=str(err))
     converted_collection = convert_list_items_to_frontend(collection.items)
     series_data = [item.model_dump(exclude_none=True, exclude_defaults=True) for item in converted_collection]
-
+    series_data.extend(series_data)
+    series_data.extend(series_data)
+    series_data.extend(series_data)
+    series_data.extend(series_data)
+    series_data = series_data[:108]
     return templates.TemplateResponse(
-        "onboarding1.html", {"request": request, "series_data": series_data, "title": "Онбординг"}
+        "onboarding.html", {"request": request, "series_data": series_data, "title": "Онбординг"}
     )

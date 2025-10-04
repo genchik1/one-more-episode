@@ -100,45 +100,50 @@
 
         .poster-expanded {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 85vw;
+            height: 75vh;
             background: #000;
             z-index: 100;
             display: flex;
             flex-direction: column;
+            border-radius: 4vw;
+            overflow: hidden;
+            box-shadow: 0 4vw 8vw rgba(0, 0, 0, 0.8);
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .poster-expanded.active {
+            transform: translate(-50%, -50%) scale(1);
             opacity: 1;
         }
 
         .poster-expanded-image {
             width: 100%;
-            height: 70vh;
+            height: 60%;
             object-fit: cover;
         }
 
         .poster-expanded-content {
             flex: 1;
-            padding: 5vw;
+            padding: 4vw;
             background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             overflow-y: auto;
         }
 
         .poster-info-title {
-            font-size: 6vw;
-            margin-bottom: 4vw;
+            font-size: 5vw;
+            margin-bottom: 3vw;
             font-weight: bold;
             color: #fff;
         }
 
         .poster-info-description {
-            font-size: 4vw;
-            margin-bottom: 5vw;
+            font-size: 3.5vw;
+            margin-bottom: 4vw;
             line-height: 1.4;
             color: #ecf0f1;
         }
@@ -146,39 +151,39 @@
         .poster-info-rating {
             display: flex;
             align-items: center;
-            margin-bottom: 5vw;
+            margin-bottom: 4vw;
         }
 
         .rating-stars {
             color: #ffc107;
             margin-right: 3vw;
-            font-size: 5vw;
+            font-size: 4vw;
         }
 
         .rating-value {
             font-weight: bold;
-            font-size: 4.5vw;
+            font-size: 3.5vw;
             color: #fff;
         }
 
         .poster-actions {
             display: flex;
             justify-content: space-around;
-            margin-top: 6vw;
-            padding: 0 10vw;
+            margin-top: 5vw;
+            padding: 0 8vw;
         }
 
         .action-btn {
             background: rgba(255, 255, 255, 0.15);
             border: none;
             color: #fff;
-            font-size: 6vw;
+            font-size: 5vw;
             cursor: pointer;
-            padding: 3vw;
+            padding: 2.5vw;
             border-radius: 50%;
             transition: all 0.2s ease;
-            width: 15vw;
-            height: 15vw;
+            width: 12vw;
+            height: 12vw;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -204,37 +209,13 @@
             color: #f39c12;
         }
 
-        .close-btn {
-            position: absolute;
-            top: 3vw;
-            right: 3vw;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: #fff;
-            font-size: 8vw;
-            cursor: pointer;
-            width: 12vw;
-            height: 12vw;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 101;
-            transition: all 0.2s ease;
-        }
-
-        .close-btn:active {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0.9);
-        }
-
         .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
+            background-color: rgba(0, 0, 0, 0.7);
             z-index: 99;
             opacity: 0;
             pointer-events: none;
@@ -249,36 +230,32 @@
         /* Адаптация для разных ориентаций */
         @media (orientation: landscape) {
             .poster-expanded {
+                width: 70vw;
+                height: 80vh;
                 flex-direction: row;
             }
 
             .poster-expanded-image {
-                width: 60vw;
-                height: 100vh;
+                width: 50%;
+                height: 100%;
             }
 
             .poster-expanded-content {
-                width: 40vw;
-                height: 100vh;
-                padding: 4vw;
+                width: 50%;
+                height: 100%;
+                padding: 3vw;
             }
 
             .poster-info-title {
-                font-size: 4vw;
+                font-size: 3vw;
             }
 
             .poster-info-description {
-                font-size: 2.5vw;
+                font-size: 2vw;
             }
 
             .action-btn {
-                font-size: 4vw;
-                width: 10vw;
-                height: 10vw;
-            }
-
-            .close-btn {
-                font-size: 5vw;
+                font-size: 3vw;
                 width: 8vw;
                 height: 8vw;
             }
@@ -294,6 +271,11 @@
             .poster-title {
                 font-size: 3.5vw;
             }
+
+            .poster-expanded {
+                width: 90vw;
+                height: 70vh;
+            }
         }
     </style>
 </head>
@@ -302,8 +284,7 @@
         <div class="posters-container" id="postersContainer">
             {% for series in series_data %}
             <div class="poster" data-id="{{ series.id }}">
-                <img src="{{ series.image }}" alt="{{ series.title }}" class="poster-image"
-                     onerror="this.src='https://via.placeholder.com/300x450/333/fff?text=No+Image'">
+                <img src="{{ series.image }}" alt="{{ series.title }}" class="poster-image">
                 <div class="poster-title">{{ series.title }}</div>
             </div>
             {% endfor %}
@@ -312,18 +293,8 @@
     <div class="overlay" id="overlay"></div>
 
     <script>
-        // Данные сериалов
-        const seriesData = [
-            {% for series in series_data %}
-            {
-                id: {{ series.id }},
-                title: "{{ series.title|replace('"', '\\"') }}",
-                description: "{{ series.description|replace('"', '\\"') }}",
-                rating: {{ series.rating }},
-                image: "{{ series.image }}"
-            }{% if not loop.last %},{% endif %}
-            {% endfor %}
-        ];
+        // Данные сериалов из Jinja2 - используем безопасный JSON
+        const seriesData = {{ series_data|tojson }};
 
         // Элементы DOM
         const postersContainer = document.getElementById('postersContainer');
@@ -338,41 +309,29 @@
         let lastTime = 0;
         let animationFrame;
 
-        // Создаем сетку 6x18 постеров
-        function createPostersGrid() {
-            postersContainer.innerHTML = '';
+        // Границы для ограничения перемещения
+        let minX = 0, maxX = 0, minY = 0, maxY = 0;
 
-            // Дублируем данные для заполнения сетки 6x18 (108 постеров)
-            const totalPosters = 6 * 18;
-            const repeatedData = [];
+        // Вычисляем границы перемещения
+        function calculateBounds() {
+            const posterWidth = 22; // vw
+            const posterHeight = 33; // vw
+            const gap = 3; // vw
+            const padding = 4; // vw
 
-            for (let i = 0; i < totalPosters; i++) {
-                const series = seriesData[i % seriesData.length];
-                repeatedData.push({...series, gridId: i});
-            }
+            // Размеры всей сетки
+            const gridWidth = 6 * posterWidth + 5 * gap + 2 * padding;
+            const gridHeight = 18 * posterHeight + 17 * gap + 2 * padding;
 
-            // Создаем постеры
-            repeatedData.forEach(series => {
-                const posterElement = document.createElement('div');
-                posterElement.className = 'poster';
-                posterElement.dataset.id = series.id;
-                posterElement.dataset.gridId = series.gridId;
+            // Размеры видимой области
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
 
-                const posterImage = document.createElement('img');
-                posterImage.className = 'poster-image';
-                posterImage.src = series.image;
-                posterImage.alt = series.title;
-
-                const posterTitle = document.createElement('div');
-                posterTitle.className = 'poster-title';
-                posterTitle.textContent = series.title;
-
-                posterElement.appendChild(posterImage);
-                posterElement.appendChild(posterTitle);
-                postersContainer.appendChild(posterElement);
-            });
-
-            return repeatedData;
+            // Вычисляем границы (не позволяем уходить дальше краев сетки)
+            minX = -((gridWidth * screenWidth / 100) - screenWidth);
+            maxX = 0;
+            minY = -((gridHeight * screenHeight / 100) - screenHeight);
+            maxY = 0;
         }
 
         // Центрируем сетку так, чтобы центр массива был в центре экрана
@@ -401,6 +360,9 @@
             postersContainer.style.transform = 'translate(0px, 0px)';
             currentX = 0;
             currentY = 0;
+
+            // Пересчитываем границы
+            calculateBounds();
         }
 
         // Функция для создания звезд рейтинга
@@ -507,11 +469,6 @@
             actions.appendChild(dislikeBtn);
             actions.appendChild(bookmarkBtn);
 
-            // Создаем кнопку закрытия
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'close-btn';
-            closeBtn.innerHTML = '×';
-
             // Собираем контент
             posterContent.appendChild(title);
             posterContent.appendChild(description);
@@ -520,7 +477,6 @@
 
             expandedPoster.appendChild(expandedImage);
             expandedPoster.appendChild(posterContent);
-            expandedPoster.appendChild(closeBtn);
 
             // Добавляем увеличенный постер на страницу
             document.body.appendChild(expandedPoster);
@@ -562,33 +518,23 @@
                 }, 300);
             }
 
-            // Закрытие по клику на оверлей или кнопку закрытия
+            // Закрытие по клику на оверлей
             overlay.addEventListener('click', closeExpandedPoster);
-            closeBtn.addEventListener('click', closeExpandedPoster);
 
-            // Свайп вниз для закрытия
-            let startY = 0;
-            let isSwiping = false;
-
-            expandedPoster.addEventListener('touchstart', (e) => {
-                startY = e.touches[0].clientY;
-                isSwiping = true;
-            });
-
-            expandedPoster.addEventListener('touchmove', (e) => {
-                if (!isSwiping) return;
-                const currentY = e.touches[0].clientY;
-                const diff = currentY - startY;
-
-                if (diff > 50) {
+            // Закрытие по клику на сам постер (если клик не на кнопках)
+            expandedPoster.addEventListener('click', function(e) {
+                if (e.target === expandedPoster || e.target === expandedImage) {
                     closeExpandedPoster();
-                    isSwiping = false;
                 }
             });
+        }
 
-            expandedPoster.addEventListener('touchend', () => {
-                isSwiping = false;
-            });
+        // Ограничиваем позицию в пределах границ
+        function clampPosition(x, y) {
+            return {
+                x: Math.max(minX, Math.min(maxX, x)),
+                y: Math.max(minY, Math.min(maxY, y))
+            };
         }
 
         // Функции для перетаскивания
@@ -614,8 +560,16 @@
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-            currentX = clientX - startX;
-            currentY = clientY - startY;
+            let newX = clientX - startX;
+            let newY = clientY - startY;
+
+            // Применяем ограничения
+            const clamped = clampPosition(newX, newY);
+            newX = clamped.x;
+            newY = clamped.y;
+
+            currentX = newX;
+            currentY = newY;
 
             // Вычисляем скорость для инерции
             const currentTime = Date.now();
@@ -643,10 +597,22 @@
         }
 
         function applyInertia() {
-            const friction = 0.95;
+            const friction = 0.92;
 
-            currentX += velocityX * 16;
-            currentY += velocityY * 16;
+            let newX = currentX + velocityX * 16;
+            let newY = currentY + velocityY * 16;
+
+            // Применяем ограничения к новой позиции
+            const clamped = clampPosition(newX, newY);
+            newX = clamped.x;
+            newY = clamped.y;
+
+            // Если достигли границы, останавливаемся
+            if (newX === currentX) velocityX = 0;
+            if (newY === currentY) velocityY = 0;
+
+            currentX = newX;
+            currentY = newY;
 
             velocityX *= friction;
             velocityY *= friction;
@@ -681,7 +647,7 @@
 
         // Инициализация
         function init() {
-            createPostersGrid();
+            console.log('Initializing with series data:', seriesData);
             setupPosterEvents();
             setupDragEvents();
 
@@ -690,11 +656,14 @@
                 centerGrid();
             }, 100);
 
-            window.addEventListener('resize', centerGrid);
+            window.addEventListener('resize', () => {
+                centerGrid();
+                calculateBounds();
+            });
         }
 
         // Запускаем при загрузке
-        window.addEventListener('load', init);
+        document.addEventListener('DOMContentLoaded', init);
 
         // Инициализация Telegram WebApp
         if (window.Telegram && window.Telegram.WebApp) {

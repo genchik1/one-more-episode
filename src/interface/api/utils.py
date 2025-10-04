@@ -7,8 +7,9 @@ def convert_item_to_frontend(item: ItemFeatures) -> ItemResponse:
         id=item.id,
         title=item.name,
         description=item.description,
-        image=item.poster.preview_url or item.poster.url,
         rating=item.rating.get("kp"),
+        image=item.poster.preview_url or item.poster.url,
+        image_full=item.poster.url or item.poster.preview_url or item.poster.url,
     )
 
 

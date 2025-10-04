@@ -13,3 +13,4 @@ class ItemResponse(BaseModel):
     description: str
     rating: float
     image: str
+    image_full: str

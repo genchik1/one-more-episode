@@ -137,34 +137,41 @@
             height: 100%;
             background: linear-gradient(
                 to bottom,
-                rgba(0, 0, 0, 0.8) 0%,
-                rgba(0, 0, 0, 0.6) 20%,
-                rgba(0, 0, 0, 0.4) 40%,
-                rgba(0, 0, 0, 0.8) 100%
+                rgba(0, 0, 0, 0.3) 0%,
+                rgba(0, 0, 0, 0.4) 30%,
+                rgba(0, 0, 0, 0.7) 60%,
+                rgba(0, 0, 0, 0.9) 100%
             );
             z-index: 2;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            padding: 4vw;
+            justify-content: flex-end;
+            padding: 0;
         }
 
-        .poster-actions-top {
+        .poster-content-wrapper {
             display: flex;
-            justify-content: flex-end;
-            gap: 2vw;
-            margin-bottom: 2vw;
+            flex-direction: column;
+            gap: 3vw;
+            margin-bottom: 0;
+        }
+
+        .poster-actions-center {
+            display: flex;
+            justify-content: center;
+            gap: 4vw;
+            margin-bottom: 0;
         }
 
         .action-btn {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             border: none;
-            color: #fff;
+            color: rgba(255, 255, 255, 0.8);
             font-size: 5vw;
             cursor: pointer;
             padding: 2.5vw;
             border-radius: 50%;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             width: 12vw;
             height: 12vw;
             display: flex;
@@ -172,35 +179,43 @@
             justify-content: center;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .action-btn:active {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(0.95);
+        }
+
+        .action-btn.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2c3e50;
+            transform: scale(1.05);
         }
 
         .like-btn.active {
-            background: rgba(231, 76, 60, 0.8);
+            background: rgba(231, 76, 60, 0.9);
             color: #fff;
         }
 
         .dislike-btn.active {
-            background: rgba(52, 152, 219, 0.8);
+            background: rgba(52, 152, 219, 0.9);
             color: #fff;
         }
 
         .bookmark-btn.active {
-            background: rgba(243, 156, 18, 0.8);
+            background: rgba(243, 156, 18, 0.9);
             color: #fff;
         }
 
-        .poster-info-bottom {
-            margin-top: auto;
+        .poster-info-content {
+            text-align: left;
+            padding: 2vw;
         }
 
         .poster-info-title {
-            font-size: 6vw;
-            margin-bottom: 3vw;
+            font-size: 5vw;
+            margin-bottom: 1vw;
             font-weight: bold;
             color: #fff;
             text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
@@ -210,30 +225,34 @@
         .poster-info-rating {
             display: flex;
             align-items: center;
-            margin-bottom: 4vw;
+            justify-content: left;
+            margin-bottom: 0;
+            gap: 3vw;
+            padding: 1vw;
         }
 
         .rating-stars {
             color: #ffc107;
-            margin-right: 3vw;
-            font-size: 5vw;
+            font-size: 4vw;
             text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
         }
 
         .rating-value {
             font-weight: bold;
-            font-size: 4.5vw;
+            font-size: 4vw;
             color: #fff;
             text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
         }
 
         .poster-info-description {
-            font-size: 4vw;
+            font-size: 3vw;
             line-height: 1.4;
             color: #ecf0f1;
             text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
-            max-height: 30vh;
+            max-height: 20vh;
             overflow-y: auto;
+            text-align: left;
+            padding: 1vw;
         }
 
         .overlay {
@@ -262,15 +281,21 @@
             }
 
             .poster-expanded-overlay {
-                padding: 3vw;
+                padding: 0 3vw 15vh 3vw;
+            }
+
+            .poster-content-wrapper {
+                gap: 2vw;
+                margin-bottom: 4vh;
             }
 
             .poster-info-title {
-                font-size: 4vw;
+                font-size: 3.5vw;
             }
 
             .poster-info-description {
-                font-size: 2.5vw;
+                font-size: 2.2vw;
+                max-height: 15vh;
             }
 
             .action-btn {
@@ -286,6 +311,11 @@
 
             .rating-value {
                 font-size: 2.8vw;
+            }
+
+            .poster-actions-center {
+                gap: 3vw;
+                margin-bottom: 0;
             }
         }
 
@@ -303,6 +333,10 @@
             .poster-expanded {
                 width: 90vw;
                 height: 70vh;
+            }
+
+            .poster-expanded-overlay {
+                padding: 0 4vw 18vh 4vw;
             }
 
             .poster-info-title {
@@ -490,9 +524,13 @@
             const posterOverlay = document.createElement('div');
             posterOverlay.className = 'poster-expanded-overlay';
 
-            // Создаем кнопки действий (вверху)
-            const actionsTop = document.createElement('div');
-            actionsTop.className = 'poster-actions-top';
+            // Создаем обертку для контента
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'poster-content-wrapper';
+
+            // Создаем кнопки действий (по центру)
+            const actionsCenter = document.createElement('div');
+            actionsCenter.className = 'poster-actions-center';
 
             const likeBtn = document.createElement('button');
             likeBtn.className = 'action-btn like-btn';
@@ -506,13 +544,13 @@
             bookmarkBtn.className = 'action-btn bookmark-btn';
             bookmarkBtn.innerHTML = '🔖';
 
-            actionsTop.appendChild(likeBtn);
-            actionsTop.appendChild(dislikeBtn);
-            actionsTop.appendChild(bookmarkBtn);
+            actionsCenter.appendChild(likeBtn);
+            actionsCenter.appendChild(dislikeBtn);
+            actionsCenter.appendChild(bookmarkBtn);
 
-            // Создаем информационный блок (внизу)
+            // Создаем информационный блок
             const posterInfo = document.createElement('div');
-            posterInfo.className = 'poster-info-bottom';
+            posterInfo.className = 'poster-info-content';
 
             const title = document.createElement('div');
             title.className = 'poster-info-title';
@@ -541,9 +579,12 @@
             posterInfo.appendChild(rating);
             posterInfo.appendChild(description);
 
+            // Собираем контент
+            contentWrapper.appendChild(actionsCenter);
+            contentWrapper.appendChild(posterInfo);
+
             // Собираем оверлей
-            posterOverlay.appendChild(actionsTop);
-            posterOverlay.appendChild(posterInfo);
+            posterOverlay.appendChild(contentWrapper);
 
             // Собираем весь постер
             expandedPoster.appendChild(expandedImage);

@@ -107,8 +107,6 @@
             height: 75vh;
             background: #000;
             z-index: 100;
-            display: flex;
-            flex-direction: column;
             border-radius: 4vw;
             overflow: hidden;
             box-shadow: 0 4vw 8vw rgba(0, 0, 0, 0.8);
@@ -122,59 +120,44 @@
         }
 
         .poster-expanded-image {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 60%;
+            height: 100%;
             object-fit: cover;
+            z-index: 1;
         }
 
-        .poster-expanded-content {
-            flex: 1;
+        .poster-expanded-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0.8) 0%,
+                rgba(0, 0, 0, 0.6) 20%,
+                rgba(0, 0, 0, 0.4) 40%,
+                rgba(0, 0, 0, 0.8) 100%
+            );
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             padding: 4vw;
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            overflow-y: auto;
         }
 
-        .poster-info-title {
-            font-size: 5vw;
-            margin-bottom: 3vw;
-            font-weight: bold;
-            color: #fff;
-        }
-
-        .poster-info-description {
-            font-size: 3.5vw;
-            margin-bottom: 4vw;
-            line-height: 1.4;
-            color: #ecf0f1;
-        }
-
-        .poster-info-rating {
+        .poster-actions-top {
             display: flex;
-            align-items: center;
-            margin-bottom: 4vw;
-        }
-
-        .rating-stars {
-            color: #ffc107;
-            margin-right: 3vw;
-            font-size: 4vw;
-        }
-
-        .rating-value {
-            font-weight: bold;
-            font-size: 3.5vw;
-            color: #fff;
-        }
-
-        .poster-actions {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 5vw;
-            padding: 0 8vw;
+            justify-content: flex-end;
+            gap: 2vw;
+            margin-bottom: 2vw;
         }
 
         .action-btn {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.2);
             border: none;
             color: #fff;
             font-size: 5vw;
@@ -187,26 +170,70 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .action-btn:active {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.3);
             transform: scale(0.9);
         }
 
         .like-btn.active {
-            background: rgba(231, 76, 60, 0.6);
-            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.8);
+            color: #fff;
         }
 
         .dislike-btn.active {
-            background: rgba(52, 152, 219, 0.6);
-            color: #3498db;
+            background: rgba(52, 152, 219, 0.8);
+            color: #fff;
         }
 
         .bookmark-btn.active {
-            background: rgba(243, 156, 18, 0.6);
-            color: #f39c12;
+            background: rgba(243, 156, 18, 0.8);
+            color: #fff;
+        }
+
+        .poster-info-bottom {
+            margin-top: auto;
+        }
+
+        .poster-info-title {
+            font-size: 6vw;
+            margin-bottom: 3vw;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
+            line-height: 1.2;
+        }
+
+        .poster-info-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4vw;
+        }
+
+        .rating-stars {
+            color: #ffc107;
+            margin-right: 3vw;
+            font-size: 5vw;
+            text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
+        }
+
+        .rating-value {
+            font-weight: bold;
+            font-size: 4.5vw;
+            color: #fff;
+            text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
+        }
+
+        .poster-info-description {
+            font-size: 4vw;
+            line-height: 1.4;
+            color: #ecf0f1;
+            text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
+            max-height: 30vh;
+            overflow-y: auto;
         }
 
         .overlay {
@@ -232,32 +259,33 @@
             .poster-expanded {
                 width: 70vw;
                 height: 80vh;
-                flex-direction: row;
             }
 
-            .poster-expanded-image {
-                width: 50%;
-                height: 100%;
-            }
-
-            .poster-expanded-content {
-                width: 50%;
-                height: 100%;
+            .poster-expanded-overlay {
                 padding: 3vw;
             }
 
             .poster-info-title {
-                font-size: 3vw;
+                font-size: 4vw;
             }
 
             .poster-info-description {
-                font-size: 2vw;
+                font-size: 2.5vw;
             }
 
             .action-btn {
                 font-size: 3vw;
                 width: 8vw;
                 height: 8vw;
+                padding: 1.5vw;
+            }
+
+            .rating-stars {
+                font-size: 3vw;
+            }
+
+            .rating-value {
+                font-size: 2.8vw;
             }
         }
 
@@ -276,6 +304,24 @@
                 width: 90vw;
                 height: 70vh;
             }
+
+            .poster-info-title {
+                font-size: 5vw;
+            }
+
+            .poster-info-description {
+                font-size: 3.5vw;
+            }
+        }
+
+        /* Скрываем scrollbar для описания */
+        .poster-info-description::-webkit-scrollbar {
+            display: none;
+        }
+
+        .poster-info-description {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
@@ -325,9 +371,6 @@
             const gridWidth = containerRect.width;
             const gridHeight = containerRect.height;
 
-            console.log('Grid dimensions:', gridWidth, gridHeight);
-            console.log('Screen dimensions:', screenWidth, screenHeight);
-
             // Вычисляем границы перемещения
             // Не позволяем уходить дальше краев сетки
             minX = -(gridWidth - screenWidth);
@@ -342,8 +385,6 @@
             if (gridHeight <= screenHeight) {
                 minY = maxY = (screenHeight - gridHeight) / 2;
             }
-
-            console.log('Bounds - minX:', minX, 'maxX:', maxX, 'minY:', minY, 'maxY:', maxY);
         }
 
         // Центрируем сетку так, чтобы центр массива был в центре экрана
@@ -368,19 +409,14 @@
             const screenCenterY = screenHeight / 2;
 
             // Вычисляем смещение, чтобы центр сетки был в центре экрана
-            // Это смещение контейнера относительно его текущей позиции
             const targetX = screenCenterX - gridCenterX;
             const targetY = screenCenterY - gridCenterY;
-
-            console.log('Centering - grid center:', gridCenterX, gridCenterY, 'screen center:', screenCenterX, screenCenterY);
-            console.log('Target position:', targetX, targetY);
 
             // Устанавливаем позицию контейнера
             postersContainer.style.left = '0px';
             postersContainer.style.top = '0px';
 
             // Используем transform для позиционирования
-            // Это более эффективно для производительности
             currentX = targetX;
             currentY = targetY;
 
@@ -450,17 +486,37 @@
             expandedImage.src = series.image;
             expandedImage.alt = series.title;
 
-            // Создаем контент с информацией
-            const posterContent = document.createElement('div');
-            posterContent.className = 'poster-expanded-content';
+            // Создаем оверлей с контентом
+            const posterOverlay = document.createElement('div');
+            posterOverlay.className = 'poster-expanded-overlay';
+
+            // Создаем кнопки действий (вверху)
+            const actionsTop = document.createElement('div');
+            actionsTop.className = 'poster-actions-top';
+
+            const likeBtn = document.createElement('button');
+            likeBtn.className = 'action-btn like-btn';
+            likeBtn.innerHTML = '👍';
+
+            const dislikeBtn = document.createElement('button');
+            dislikeBtn.className = 'action-btn dislike-btn';
+            dislikeBtn.innerHTML = '👎';
+
+            const bookmarkBtn = document.createElement('button');
+            bookmarkBtn.className = 'action-btn bookmark-btn';
+            bookmarkBtn.innerHTML = '🔖';
+
+            actionsTop.appendChild(likeBtn);
+            actionsTop.appendChild(dislikeBtn);
+            actionsTop.appendChild(bookmarkBtn);
+
+            // Создаем информационный блок (внизу)
+            const posterInfo = document.createElement('div');
+            posterInfo.className = 'poster-info-bottom';
 
             const title = document.createElement('div');
             title.className = 'poster-info-title';
             title.textContent = series.title;
-
-            const description = document.createElement('div');
-            description.className = 'poster-info-description';
-            description.textContent = series.description;
 
             const rating = document.createElement('div');
             rating.className = 'poster-info-rating';
@@ -476,34 +532,22 @@
             rating.appendChild(stars);
             rating.appendChild(value);
 
-            // Создаем кнопки действий
-            const actions = document.createElement('div');
-            actions.className = 'poster-actions';
+            const description = document.createElement('div');
+            description.className = 'poster-info-description';
+            description.textContent = series.description;
 
-            const likeBtn = document.createElement('button');
-            likeBtn.className = 'action-btn like-btn';
-            likeBtn.innerHTML = '👍';
+            // Собираем информационный блок
+            posterInfo.appendChild(title);
+            posterInfo.appendChild(rating);
+            posterInfo.appendChild(description);
 
-            const dislikeBtn = document.createElement('button');
-            dislikeBtn.className = 'action-btn dislike-btn';
-            dislikeBtn.innerHTML = '👎';
+            // Собираем оверлей
+            posterOverlay.appendChild(actionsTop);
+            posterOverlay.appendChild(posterInfo);
 
-            const bookmarkBtn = document.createElement('button');
-            bookmarkBtn.className = 'action-btn bookmark-btn';
-            bookmarkBtn.innerHTML = '🔖';
-
-            actions.appendChild(likeBtn);
-            actions.appendChild(dislikeBtn);
-            actions.appendChild(bookmarkBtn);
-
-            // Собираем контент
-            posterContent.appendChild(title);
-            posterContent.appendChild(description);
-            posterContent.appendChild(rating);
-            posterContent.appendChild(actions);
-
+            // Собираем весь постер
             expandedPoster.appendChild(expandedImage);
-            expandedPoster.appendChild(posterContent);
+            expandedPoster.appendChild(posterOverlay);
 
             // Добавляем увеличенный постер на страницу
             document.body.appendChild(expandedPoster);
@@ -548,7 +592,7 @@
             // Закрытие по клику на оверлей
             overlay.addEventListener('click', closeExpandedPoster);
 
-            // Закрытие по клику на сам постер (если клик не на кнопках)
+            // Закрытие по клику на сам постер
             expandedPoster.addEventListener('click', function(e) {
                 if (e.target === expandedPoster || e.target === expandedImage) {
                     closeExpandedPoster();
@@ -558,12 +602,11 @@
 
         // Ограничиваем позицию в пределах границ
         function clampPosition(x, y) {
-            const elasticity = 0.3; // Коэффициент эластичности у границ
+            const elasticity = 0.3;
 
             let clampedX = x;
             let clampedY = y;
 
-            // Эластичный эффект при достижении границ
             if (x > maxX) {
                 clampedX = maxX + (x - maxX) * elasticity;
             } else if (x < minX) {
@@ -608,7 +651,6 @@
             let newX = clientX - startX;
             let newY = clientY - startY;
 
-            // Применяем ограничения с эластичным эффектом
             const clamped = clampPosition(newX, newY);
             newX = clamped.x;
             newY = clamped.y;
@@ -616,7 +658,6 @@
             currentX = newX;
             currentY = newY;
 
-            // Вычисляем скорость для инерции
             const currentTime = Date.now();
             const deltaTime = currentTime - lastTime;
 
@@ -635,7 +676,6 @@
         function endDrag() {
             isDragging = false;
 
-            // Добавляем инерцию
             if (Math.abs(velocityX) > 0.1 || Math.abs(velocityY) > 0.1) {
                 applyInertia();
             }
@@ -647,12 +687,10 @@
             let newX = currentX + velocityX * 16;
             let newY = currentY + velocityY * 16;
 
-            // Применяем ограничения к новой позиции
             const clamped = clampPosition(newX, newY);
             newX = clamped.x;
             newY = clamped.y;
 
-            // Если достигли границы, добавляем дополнительное трение
             if (newX === currentX || Math.abs(newX - currentX) < 0.5) velocityX = 0;
             if (newY === currentY || Math.abs(newY - currentY) < 0.5) velocityY = 0;
 
@@ -664,7 +702,6 @@
 
             postersContainer.style.transform = `translate(${currentX}px, ${currentY}px)`;
 
-            // Продолжаем анимацию, если есть достаточная скорость
             if (Math.abs(velocityX) > 0.1 || Math.abs(velocityY) > 0.1) {
                 animationFrame = requestAnimationFrame(applyInertia);
             }
@@ -672,12 +709,10 @@
 
         // Настройка событий перетаскивания
         function setupDragEvents() {
-            // Touch события
             postersContainer.addEventListener('touchstart', startDrag);
             postersContainer.addEventListener('touchmove', duringDrag);
             postersContainer.addEventListener('touchend', endDrag);
 
-            // Mouse события (для тестирования)
             postersContainer.addEventListener('mousedown', startDrag);
             postersContainer.addEventListener('mousemove', duringDrag);
             postersContainer.addEventListener('mouseup', endDrag);
@@ -696,7 +731,6 @@
             setupPosterEvents();
             setupDragEvents();
 
-            // Даем время на рендеринг, затем центрируем
             setTimeout(() => {
                 centerGrid();
             }, 100);

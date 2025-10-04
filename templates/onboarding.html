@@ -314,55 +314,82 @@
 
         // Вычисляем границы перемещения
         function calculateBounds() {
-            const posterWidth = 22; // vw
-            const posterHeight = 33; // vw
-            const gap = 3; // vw
-            const padding = 4; // vw
+            // Получаем реальные размеры контейнера с постерами
+            const containerRect = postersContainer.getBoundingClientRect();
 
-            // Размеры всей сетки
-            const gridWidth = 6 * posterWidth + 5 * gap + 2 * padding;
-            const gridHeight = 18 * posterHeight + 17 * gap + 2 * padding;
+            // Размеры видимой области (окна браузера)
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+
+            // Размеры всего контейнера с постерами
+            const gridWidth = containerRect.width;
+            const gridHeight = containerRect.height;
+
+            console.log('Grid dimensions:', gridWidth, gridHeight);
+            console.log('Screen dimensions:', screenWidth, screenHeight);
+
+            // Вычисляем границы перемещения
+            // Не позволяем уходить дальше краев сетки
+            minX = -(gridWidth - screenWidth);
+            maxX = 0;
+            minY = -(gridHeight - screenHeight);
+            maxY = 0;
+
+            // Если сетка меньше экрана, центрируем ее
+            if (gridWidth <= screenWidth) {
+                minX = maxX = (screenWidth - gridWidth) / 2;
+            }
+            if (gridHeight <= screenHeight) {
+                minY = maxY = (screenHeight - gridHeight) / 2;
+            }
+
+            console.log('Bounds - minX:', minX, 'maxX:', maxX, 'minY:', minY, 'maxY:', maxY);
+        }
+
+        // Центрируем сетку так, чтобы центр массива был в центре экрана
+        function centerGrid() {
+            // Получаем реальные размеры контейнера
+            const containerRect = postersContainer.getBoundingClientRect();
 
             // Размеры видимой области
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
 
-            // Вычисляем границы (не позволяем уходить дальше краев сетки)
-            minX = -((gridWidth * screenWidth / 100) - screenWidth);
-            maxX = 0;
-            minY = -((gridHeight * screenHeight / 100) - screenHeight);
-            maxY = 0;
-        }
+            // Размеры всего контейнера с постерами
+            const gridWidth = containerRect.width;
+            const gridHeight = containerRect.height;
 
-        // Центрируем сетку так, чтобы центр массива был в центре экрана
-        function centerGrid() {
-            const posterWidth = 22; // vw
-            const posterHeight = 33; // vw
-            const gap = 3; // vw
-            const padding = 4; // vw
+            // Центр сетки (центр всего массива постеров)
+            const gridCenterX = gridWidth / 2;
+            const gridCenterY = gridHeight / 2;
 
-            // Размеры всей сетки
-            const gridWidth = 6 * posterWidth + 5 * gap + 2 * padding;
-            const gridHeight = 18 * posterHeight + 17 * gap + 2 * padding;
+            // Центр экрана
+            const screenCenterX = screenWidth / 2;
+            const screenCenterY = screenHeight / 2;
 
-            // Центр сетки (между 3 и 4 колонками, 9 и 10 строками)
-            const centerX = (gridWidth / 2) - (posterWidth + gap) / 2;
-            const centerY = (gridHeight / 2) - (posterHeight + gap) / 2;
+            // Вычисляем смещение, чтобы центр сетки был в центре экрана
+            // Это смещение контейнера относительно его текущей позиции
+            const targetX = screenCenterX - gridCenterX;
+            const targetY = screenCenterY - gridCenterY;
 
-            // Смещаем контейнер так, чтобы центр был в центре экрана
-            const offsetX = -centerX * window.innerWidth / 100 + (window.innerWidth / 2);
-            const offsetY = -centerY * window.innerHeight / 100 + (window.innerHeight / 2);
+            console.log('Centering - grid center:', gridCenterX, gridCenterY, 'screen center:', screenCenterX, screenCenterY);
+            console.log('Target position:', targetX, targetY);
 
-            postersContainer.style.left = offsetX + 'px';
-            postersContainer.style.top = offsetY + 'px';
+            // Устанавливаем позицию контейнера
+            postersContainer.style.left = '0px';
+            postersContainer.style.top = '0px';
 
-            // Сбрасываем трансформацию
-            postersContainer.style.transform = 'translate(0px, 0px)';
-            currentX = 0;
-            currentY = 0;
+            // Используем transform для позиционирования
+            // Это более эффективно для производительности
+            currentX = targetX;
+            currentY = targetY;
 
-            // Пересчитываем границы
-            calculateBounds();
+            postersContainer.style.transform = `translate(${currentX}px, ${currentY}px)`;
+
+            // Пересчитываем границы после позиционирования
+            setTimeout(() => {
+                calculateBounds();
+            }, 100);
         }
 
         // Функция для создания звезд рейтинга
@@ -531,9 +558,27 @@
 
         // Ограничиваем позицию в пределах границ
         function clampPosition(x, y) {
+            const elasticity = 0.3; // Коэффициент эластичности у границ
+
+            let clampedX = x;
+            let clampedY = y;
+
+            // Эластичный эффект при достижении границ
+            if (x > maxX) {
+                clampedX = maxX + (x - maxX) * elasticity;
+            } else if (x < minX) {
+                clampedX = minX + (x - minX) * elasticity;
+            }
+
+            if (y > maxY) {
+                clampedY = maxY + (y - maxY) * elasticity;
+            } else if (y < minY) {
+                clampedY = minY + (y - minY) * elasticity;
+            }
+
             return {
-                x: Math.max(minX, Math.min(maxX, x)),
-                y: Math.max(minY, Math.min(maxY, y))
+                x: clampedX,
+                y: clampedY
             };
         }
 
@@ -563,7 +608,7 @@
             let newX = clientX - startX;
             let newY = clientY - startY;
 
-            // Применяем ограничения
+            // Применяем ограничения с эластичным эффектом
             const clamped = clampPosition(newX, newY);
             newX = clamped.x;
             newY = clamped.y;
@@ -607,9 +652,9 @@
             newX = clamped.x;
             newY = clamped.y;
 
-            // Если достигли границы, останавливаемся
-            if (newX === currentX) velocityX = 0;
-            if (newY === currentY) velocityY = 0;
+            // Если достигли границы, добавляем дополнительное трение
+            if (newX === currentX || Math.abs(newX - currentX) < 0.5) velocityX = 0;
+            if (newY === currentY || Math.abs(newY - currentY) < 0.5) velocityY = 0;
 
             currentX = newX;
             currentY = newY;
@@ -619,6 +664,7 @@
 
             postersContainer.style.transform = `translate(${currentX}px, ${currentY}px)`;
 
+            // Продолжаем анимацию, если есть достаточная скорость
             if (Math.abs(velocityX) > 0.1 || Math.abs(velocityY) > 0.1) {
                 animationFrame = requestAnimationFrame(applyInertia);
             }
@@ -647,7 +693,6 @@
 
         // Инициализация
         function init() {
-            console.log('Initializing with series data:', seriesData);
             setupPosterEvents();
             setupDragEvents();
 

@@ -23,12 +23,13 @@ def pipeline_get_onboarding_v1(
     logger: ILogger, cache_repository: repositories.IDbRepository, file_repository: repositories.IFileRepository
 ) -> Pipeline:
     logger.info("run onboarding pipeline")
-    features = ["id", "name", "year", "rating", "short_description", "poster"]
+    features = ["id", "name", "rating", "description", "poster"]
     min_rating = 6.0
     name = "onboarding_v1"
     slug = "onboarding-v1"
     return (
         Pipeline()
         >> stages.GetOnboardingCollectionV1Stage(cache_repository, file_repository, features, name, slug)
-        >> stages.FilterByRatingStage(min_rating=min_rating)
+        >> stages.FilterWithoutPreviewUrlStage()
+        # >> stages.FilterByRatingStage(min_rating=min_rating)
     )

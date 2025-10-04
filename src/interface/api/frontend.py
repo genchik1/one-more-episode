@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from src.application.di.container import StoreContainer
 from src.application.errors import PipelineError
 from src.consts import PROJECT_ROOT
+from src.interface.api.utils import convert_list_items_to_frontend
 
 frontend = APIRouter()
 container = StoreContainer()
@@ -21,8 +22,8 @@ async def onboarding(request: Request):
         collection = await pipeline.execute()
     except PipelineError as err:
         raise HTTPException(status_code=404, detail=str(err))
-    collection_data = collection.model_dump(exclude_none=True, exclude_defaults=True)
-    series_data = collection_data["items"]
+    converted_collection = convert_list_items_to_frontend(collection.items)
+    series_data = [item.model_dump(exclude_none=True, exclude_defaults=True) for item in converted_collection]
 
     return templates.TemplateResponse(
         "onboarding.html", {"request": request, "series_data": series_data, "title": "Онбординг"}

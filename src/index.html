@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сериалы</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            overflow: hidden;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            padding: 10px;
+            height: 100vh;
+            overflow: auto;
+        }
+        .poster {
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .poster img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .poster:hover {
+            transform: scale(1.05);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        .modal-content img {
+            width: 300px;
+            border-radius: 10px;
+        }
+        .buttons {
+            margin-top: 10px;
+        }
+        .button {
+            margin: 5px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .like { background-color: #4CAF50; color: white; }
+        .dislike { background-color: #f44336; color: white; }
+        .bookmark { background-color: #2196F3; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="grid" id="grid">
+    <!-- Пример постеров -->
+    <div class="poster" onclick="openModal('Сериал 1', 'Описание сериала 1', 8.5, 'poster1.jpg')">
+        <img src="poster1.jpg" alt="Сериал 1">
+    </div>
+    <div class="poster" onclick="openModal('Сериал 2', 'Описание сериала 2', 9.0, 'poster2.jpg')">
+        <img src="poster2.jpg" alt="Сериал 2">
+    </div>
+    <!-- Добавьте больше постеров по аналогии -->
+</div>
+
+<div class="modal" id="modal" onclick="closeModal()">
+    <div class="modal-content" id="modalContent" onclick="event.stopPropagation()">
+        <img id="modalImage" src="" alt="">
+        <h2 id="modalTitle"></h2>
+        <p id="modalDescription"></p>
+        <p>Рейтинг: <span id="modalRating"></span></p>
+        <div class="buttons">
+            <button class="button like" onclick="like()">👍 Лайк</button>
+            <button class="button dislike" onclick="dislike()">👎 Дизлайк</button>
+            <button class="button bookmark" onclick="bookmark()">⭐ Закладка</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal(title, description, rating, image) {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalDescription').innerText = description;
+        document.getElementById('modalRating').innerText = rating;
+        document.getElementById('modalImage').src = image;
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+    }
+
+    function like() {
+        alert('Вы поставили лайк!');
+    }
+
+    function dislike() {
+        alert('Вы поставили дизлайк!');
+    }
+
+    function bookmark() {
+        alert('Сериал добавлен в закладки!');
+    }
+</script>
+
+</body>
+</html>

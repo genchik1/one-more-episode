@@ -23,9 +23,7 @@ class KinopoiskRepository:
                 headers={"X-API-KEY": api_key},
             )
             return [
-                ItemFeatures(
-                    **doc.model_dump(exclude_defaults=True, exclude_none=True, exclude_unset=True, by_alias=False)
-                )
+                ItemFeatures(**doc.model_dump(exclude_defaults=True, exclude_none=True, by_alias=False))
                 for doc in data.docs
             ]
         except HttpException as err:

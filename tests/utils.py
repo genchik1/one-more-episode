@@ -1,7 +1,9 @@
 import logging
 
+from src.domain.logger import ILogger
 
-class TestLogger:
+
+class TestLogger(ILogger):
     def __init__(self, name: str):
         self._logger = logging.getLogger(name)
 

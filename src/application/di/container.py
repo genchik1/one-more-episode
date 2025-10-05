@@ -45,6 +45,6 @@ class StoreContainer(containers.DeclarativeContainer):
         file_repository=onboarding_json_file_repository,
     )
 
-    like_item_use_case = providers.Factory(use_cases.LikeItemUseCase, cache_repository=redis_repository)
+    like_item_use_case = providers.Factory(use_cases.LikeItemUseCase, cache_repository=redis_repository, logger=logger)
     item_features_use_case = providers.Factory(use_cases.ItemFeaturesUseCase, cache_repository=redis_repository)
     create_user_use_case = providers.Factory(use_cases.CreateUserUseCase, cache_repository=redis_repository)

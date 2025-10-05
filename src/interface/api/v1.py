@@ -27,7 +27,7 @@ async def get_collection(
         collection = await pipeline.execute()
     except PipelineError as err:
         raise HTTPException(status_code=404, detail=str(err))
-    return collection.model_dump(exclude_none=True, exclude_defaults=True, exclude_unset=True)
+    return collection.model_dump(exclude_none=True, exclude_defaults=True)
 
 
 @router.get("/onboarding")
@@ -37,7 +37,7 @@ async def get_onboarding() -> dict[str, Any]:
         collection = await pipeline.execute()
     except PipelineError as err:
         raise HTTPException(status_code=404, detail=str(err))
-    return collection.model_dump(exclude_none=True, exclude_defaults=True, exclude_unset=True)
+    return collection.model_dump(exclude_none=True, exclude_defaults=True)
 
 
 @router.post("/like")
@@ -63,4 +63,4 @@ async def get_item(item_id: int) -> dict[str, Any]:
     except Exception:
         raise HTTPException(status_code=400)
 
-    return item.model_dump(exclude_none=True, exclude_defaults=True, exclude_unset=True)
+    return item.model_dump(exclude_none=True, exclude_defaults=True)

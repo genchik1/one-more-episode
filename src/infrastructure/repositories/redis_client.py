@@ -92,7 +92,6 @@ class RedisRepository:
                 user_item_feature_dict: dict[str, Any] = user_item_feature.model_dump(
                     exclude_none=True,
                     exclude_defaults=True,
-                    exclude_unset=True,
                 )
                 serialized_user_item_feature_dict = {
                     UserItemFeatures.replace_key(key): orjson.dumps(value)
@@ -135,7 +134,6 @@ class RedisRepository:
         user_dict: dict[str, Any] = user_feature.model_dump(
             exclude_none=True,
             exclude_defaults=True,
-            exclude_unset=True,
         )
         serialized_item_dict = {UserFeatures.replace_key(key): orjson.dumps(value) for key, value in user_dict.items()}
         try:

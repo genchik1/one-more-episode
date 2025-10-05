@@ -1,9 +1,12 @@
 import json
+import os
 
 import pytest
 
 from src.application.dtos import KpMediaItem
 from src.domain.models import ItemFeatures
+from src.infrastructure.external.clients import init_redis_media_items
+from src.infrastructure.repositories import RedisRepository
 from tests.utils import TestLogger
 
 
@@ -72,11 +75,22 @@ def media_item(kp_item: str) -> KpMediaItem:
 
 @pytest.fixture
 def item_features(media_item: KpMediaItem) -> ItemFeatures:
-    return ItemFeatures(
-        **media_item.model_dump(exclude_defaults=True, exclude_none=True, exclude_unset=True, by_alias=False)
-    )
+    return ItemFeatures(**media_item.model_dump(exclude_defaults=True, exclude_none=True, by_alias=False))
 
 
 @pytest.fixture(scope="session")
 def logger() -> TestLogger:
     return TestLogger("test")
+
+
+@pytest.fixture(scope="session")
+def redis_client(logger: TestLogger):
+    os.environ["REDIS_DB"] = "15"
+    yield init_redis_media_items(logger)
+
+
+@pytest.fixture
+async def cache_repository(redis_client):
+    for key in await redis_client.keys():
+        await redis_client.delete(key)
+    yield RedisRepository(redis_client)

@@ -9,7 +9,7 @@ class LikeItemUseCase:
         self._repository = cache_repository
 
     async def execute(self, command: LikeItemCommand) -> None:
-        if command.action not in ["like", "dislike"]:
+        if command.action not in ["like", "dislike", "bookmark", "unbookmark"]:
             raise InvalidCommandError("Invalid action")
 
         user_feature = UserItemFeatures(
@@ -17,6 +17,8 @@ class LikeItemUseCase:
             item_id=command.item_id,
             is_like=(command.action == "like"),
             is_dislike=(command.action == "dislike"),
+            is_bookmark=(command.action == "bookmark"),
+            is_unbookmark=(command.action == "unbookmark"),
         )
 
         await self._repository.save_user_item_features([user_feature])

@@ -28,8 +28,8 @@ def user_features() -> list[UserFeatures]:
 
 
 @pytest.fixture
-def redis_client():
-    return init_redis_media_items()
+def redis_client(logger):
+    return init_redis_media_items(logger)
 
 
 async def test_redis_item_features_repository(

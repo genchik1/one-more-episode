@@ -8,6 +8,8 @@ class UserItemFeatures(BaseModel):
     user_id: int
     is_like: bool = False
     is_dislike: bool = False
+    is_bookmark: bool = False
+    is_unbookmark: bool = False
 
     @classmethod
     @lru_cache
@@ -17,6 +19,8 @@ class UserItemFeatures(BaseModel):
             "user_id": 2,
             "is_like": 3,
             "is_dislike": 4,
+            "is_bookmark": 5,
+            "is_unbookmark": 6,
         }
 
     @classmethod

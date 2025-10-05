@@ -42,10 +42,10 @@
         .posters-container {
             position: absolute;
             display: grid;
-            grid-template-columns: repeat(6, 22vw);
-            grid-template-rows: repeat(18, 33vw);
-            gap: 3vw;
-            padding: 4vw;
+            grid-template-columns: repeat(10, 18vw);
+            grid-template-rows: repeat(10, 27vw);
+            gap: 2vw;
+            padding: 3vw;
             transition: transform 0.1s ease-out;
             width: max-content;
             height: max-content;
@@ -53,9 +53,9 @@
         }
 
         .poster {
-            width: 22vw;
-            height: 33vw;
-            border-radius: 2vw;
+            width: 18vw;
+            height: 27vw;
+            border-radius: 1.5vw;
             cursor: pointer;
             transition: transform 0.2s ease;
             box-shadow: 0 1vw 2vw rgba(0, 0, 0, 0.4);
@@ -66,7 +66,7 @@
             color: white;
             font-weight: 600;
             text-align: center;
-            padding: 1.5vw;
+            padding: 1.2vw;
             overflow: hidden;
             position: relative;
         }
@@ -78,19 +78,19 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 2vw;
+            border-radius: 1.5vw;
             z-index: 1;
         }
 
         .poster-title {
-            font-size: 3vw;
+            font-size: 2.5vw;
             text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.9);
             z-index: 2;
             background: rgba(0, 0, 0, 0.8);
-            padding: 1.5vw 2vw;
-            border-radius: 1.5vw;
+            padding: 1.2vw 1.5vw;
+            border-radius: 1.2vw;
             width: 95%;
-            margin-bottom: 1vw;
+            margin-bottom: 0.8vw;
             line-height: 1.2;
         }
 
@@ -209,8 +209,7 @@
         }
 
         .poster-info-content {
-            text-align: left;
-            padding: 2vw;
+            text-align: center;
         }
 
         .poster-info-title {
@@ -322,12 +321,12 @@
         /* Для очень маленьких экранов */
         @media (max-width: 320px) {
             .poster {
-                width: 25vw;
-                height: 37.5vw;
+                width: 20vw;
+                height: 30vw;
             }
 
             .poster-title {
-                font-size: 3.5vw;
+                font-size: 2.2vw;
             }
 
             .poster-expanded {
@@ -374,6 +373,21 @@
 
     <script>
         // Данные сериалов из Jinja2 - используем безопасный JSON
+
+        window.Telegram.WebApp.ready();
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+          const user = window.Telegram.WebApp.initDataUnsafe.user;
+          if (user && user.id) {
+            userId = user.id;
+          } else {
+            // Default value if user data or user ID is not present
+            userId = 111111;
+          }
+        } else {
+          // Default value if Telegram Web App API is not available (e.g., opened outside Telegram)
+          userId = 100000;
+        }
+
         const seriesData = {{ series_data|tojson }};
 
         // Элементы DOM
@@ -391,6 +405,34 @@
 
         // Границы для ограничения перемещения
         let minX = 0, maxX = 0, minY = 0, maxY = 0;
+
+        // Функция для отправки событий лайков
+        async function sendLikeEvent(seriesId, action) {
+            try {
+                const response = await fetch('/api/v1/like', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        item_id: seriesId,
+                        rating: action,
+                        user_id: userId,
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                console.log('Like event sent successfully:', data);
+                return data;
+            } catch (error) {
+                console.error('Error sending like event:', error);
+                // Можно добавить повторную попытку или уведомление пользователя
+            }
+        }
 
         // Вычисляем границы перемещения
         function calculateBounds() {
@@ -486,6 +528,7 @@
         }
 
         let currentExpandedPoster = null;
+        let currentSeriesId = null;
 
         // Обработчики событий для постеров
         function setupPosterEvents() {
@@ -501,6 +544,7 @@
                     const series = seriesData.find(s => s.id === seriesId);
 
                     if (series && !currentExpandedPoster) {
+                        currentSeriesId = seriesId;
                         expandPoster(series);
                     }
                 });
@@ -599,22 +643,46 @@
                 expandedPoster.classList.add('active');
             }, 10);
 
-            // Обработчики для кнопок действий
+            // Обработчики для кнопок действий с отправкой событий
             likeBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
+                const wasActive = this.classList.contains('active');
                 this.classList.toggle('active');
                 dislikeBtn.classList.remove('active');
+
+                // Отправляем событие лайка
+                if (!wasActive) {
+                    sendLikeEvent(currentSeriesId, 'like');
+                } else {
+                    sendLikeEvent(currentSeriesId, 'unlike');
+                }
             });
 
             dislikeBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
+                const wasActive = this.classList.contains('active');
                 this.classList.toggle('active');
                 likeBtn.classList.remove('active');
+
+                // Отправляем событие дизлайка
+                if (!wasActive) {
+                    sendLikeEvent(currentSeriesId, 'dislike');
+                } else {
+                    sendLikeEvent(currentSeriesId, 'undislike');
+                }
             });
 
             bookmarkBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
+                const wasActive = this.classList.contains('active');
                 this.classList.toggle('active');
+
+                // Отправляем событие закладки
+                if (!wasActive) {
+                    sendLikeEvent(currentSeriesId, 'bookmark');
+                } else {
+                    sendLikeEvent(currentSeriesId, 'unbookmark');
+                }
             });
 
             // Функция закрытия
@@ -627,6 +695,7 @@
                         document.body.removeChild(expandedPoster);
                     }
                     currentExpandedPoster = null;
+                    currentSeriesId = null;
                 }, 300);
             }
 
@@ -785,11 +854,6 @@
         // Запускаем при загрузке
         document.addEventListener('DOMContentLoaded', init);
 
-        // Инициализация Telegram WebApp
-        if (window.Telegram && window.Telegram.WebApp) {
-            Telegram.WebApp.expand();
-            Telegram.WebApp.enableClosingConfirmation();
-        }
     </script>
 </body>
 </html>

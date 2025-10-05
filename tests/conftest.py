@@ -4,6 +4,7 @@ import pytest
 
 from src.application.dtos import KpMediaItem
 from src.domain.models import ItemFeatures
+from tests.utils import TestLogger
 
 
 @pytest.fixture
@@ -74,3 +75,8 @@ def item_features(media_item: KpMediaItem) -> ItemFeatures:
     return ItemFeatures(
         **media_item.model_dump(exclude_defaults=True, exclude_none=True, exclude_unset=True, by_alias=False)
     )
+
+
+@pytest.fixture(scope="session")
+def logger() -> TestLogger:
+    return TestLogger("test")

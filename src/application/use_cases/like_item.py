@@ -28,13 +28,17 @@ class LikeItemUseCase:
 
         await self._repository.save_user_item_features([user_item_feature])
         self._logger.info("saved user_item_feature")
-        user_features = await self._repository.get_user_features(command.user_id, ["bookmarked_series", "liked_series"])
+        user_features = await self._repository.get_user_features(
+            command.user_id, ["bookmarked_series", "liked_series", "disliked_series"]
+        )
 
         match command.action:
             case "like":
                 user_features.liked_series.append(command.item_id)
+                user_features.disliked_series.remove(command.item_id)
             case "dislike":
                 user_features.liked_series.remove(command.item_id)
+                user_features.disliked_series.append(command.item_id)
             case "bookmark":
                 user_features.bookmarked_series.append(command.item_id)
             case "unbookmark":

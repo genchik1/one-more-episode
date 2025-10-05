@@ -11,6 +11,7 @@ class UserFeatures(BaseModel):
     favorite_times: list[list[int]] = Field(default=[])
     bookmarked_series: list[int] = Field(default=[])
     liked_series: list[int] = Field(default=[])
+    disliked_series: list[int] = Field(default=[])
 
     @classmethod
     @lru_cache
@@ -23,6 +24,7 @@ class UserFeatures(BaseModel):
             "favorite_times": 5,
             "bookmarked_series": 6,
             "liked_series": 7,
+            "disliked_series": 8,
         }
 
     @classmethod

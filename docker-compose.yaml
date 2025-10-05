@@ -18,6 +18,16 @@ services:
     ports:
       - '8000:8000'
 
+  bot:
+    build: .
+    image: my-app:latest
+    command: bash -c "python store.py bot"
+    restart: unless-stopped
+    depends_on:
+      - redis
+    env_file:
+      - .common.env
+
   nginx:
     image: nginx:alpine
     restart: unless-stopped

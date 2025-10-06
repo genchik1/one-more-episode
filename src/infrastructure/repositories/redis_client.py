@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Generator
 
 import orjson
 import redis.asyncio as redis
@@ -11,7 +11,10 @@ from src.infrastructure.repositories.errors import ReadError, SaveError
 class RedisRepository:
     def __init__(self, client: redis.Redis) -> None:
         self._client: redis.Redis = client
-        self._key_sep = "|"
+        self._item_key_prefix = "i|"
+        self._user_key_prefix = "u|"
+        self._user_item_key_prefix = "ui|"
+        self._collection_key_prefix = "c|"
 
     async def save_item_features(self, collection: list[ItemFeatures]) -> None:
         async with self._client.pipeline() as pipe:
@@ -23,7 +26,7 @@ class RedisRepository:
                 serialized_item_dict = {
                     ItemFeatures.replace_key(key): orjson.dumps(value) for key, value in item_dict.items()
                 }
-                await pipe.hset(str(item.id), mapping=serialized_item_dict)
+                await pipe.hset(f"{self._item_key_prefix}{item.id}", mapping=serialized_item_dict)
 
             try:
                 await pipe.execute()
@@ -32,7 +35,7 @@ class RedisRepository:
 
     async def get_item_feature(self, identifier: int) -> ItemFeatures:
         try:
-            item_result = await self._client.hgetall(str(identifier))
+            item_result = await self._client.hgetall(f"{self._item_key_prefix}{identifier}")
         except RedisError as err:
             raise ReadError("Error getting titles info from redis") from err
 
@@ -46,7 +49,7 @@ class RedisRepository:
         replaced_features: list[str] = [ItemFeatures.replace_key(key) for key in features]
         async with self._client.pipeline() as pipe:
             for item_id in identifiers:
-                await pipe.hmget(str(item_id), replaced_features)
+                await pipe.hmget(f"{self._item_key_prefix}{item_id}", replaced_features)
 
             try:
                 redis_results = await pipe.execute()
@@ -66,7 +69,7 @@ class RedisRepository:
     async def save_collection(self, collection: ItemsCollection) -> None:
         try:
             await self._client.set(
-                collection.slug,
+                f"{self._collection_key_prefix}{collection.slug}",
                 orjson.dumps(
                     collection.model_dump(
                         exclude_none=True,
@@ -79,7 +82,7 @@ class RedisRepository:
 
     async def get_collection(self, collection_slug: str) -> ItemsCollection:
         try:
-            redis_results = await self._client.get(collection_slug)
+            redis_results = await self._client.get(f"{self._collection_key_prefix}{collection_slug}")
         except RedisError as err:
             raise ReadError("Error getting collection from redis") from err
         if not redis_results:
@@ -98,7 +101,7 @@ class RedisRepository:
                     for key, value in user_item_feature_dict.items()
                 }
                 await pipe.hset(
-                    f"{user_item_feature.item_id}|{user_item_feature.user_id}",
+                    f"{self._user_item_key_prefix}{user_item_feature.item_id}|{user_item_feature.user_id}",
                     mapping=serialized_user_item_feature_dict,
                 )
 
@@ -113,7 +116,7 @@ class RedisRepository:
         replaced_features: list[str] = [UserItemFeatures.replace_key(key) for key in features]
         async with self._client.pipeline() as pipe:
             for item_id in identifiers:
-                await pipe.hmget(f"{item_id}|{user_id}", replaced_features)
+                await pipe.hmget(f"{self._user_item_key_prefix}{item_id}|{user_id}", replaced_features)
 
             try:
                 redis_results = await pipe.execute()
@@ -137,16 +140,26 @@ class RedisRepository:
         )
         serialized_item_dict = {UserFeatures.replace_key(key): orjson.dumps(value) for key, value in user_dict.items()}
         try:
-            await self._client.hset(f"user|{user_feature.user_id}", mapping=serialized_item_dict)
+            await self._client.hset(f"{self._user_key_prefix}{user_feature.user_id}", mapping=serialized_item_dict)
         except RedisError as err:
             raise SaveError("Error saving user features to redis") from err
 
     async def get_user_features(self, user_id: int, features: list[str]) -> UserFeatures:
         replaced_features: list[str] = [UserFeatures.replace_key(key) for key in features]
-        redis_result = await self._client.hmget(f"user|{user_id}", replaced_features)
+        redis_result = await self._client.hmget(f"{self._user_key_prefix}{user_id}", replaced_features)
 
         user_data: dict[str, Any] = {"user_id": user_id}
         for feature, value in zip(features, redis_result, strict=True):
             if value is not None:
                 user_data[feature] = orjson.loads(value)
         return UserFeatures(**user_data)
+
+    async def get_all_item_keys(self, batch_size: int = 300) -> Generator[list[str]]:
+        batch = []
+        async for key in self._client.keys(self._item_key_prefix):
+            batch.append(key)
+            if len(batch) == batch_size:
+                yield batch
+                batch = []
+        if batch:
+            yield batch

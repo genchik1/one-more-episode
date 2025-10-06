@@ -3,10 +3,12 @@ import os
 
 import pytest
 
+from src import settings
 from src.application.dtos import KpMediaItem
 from src.domain.models import ItemFeatures
 from src.infrastructure.external.clients import init_redis_media_items
 from src.infrastructure.repositories import RedisRepository
+from src.settings import RedisConfig
 from tests.utils import TestLogger
 
 
@@ -84,9 +86,14 @@ def logger() -> TestLogger:
 
 
 @pytest.fixture(scope="session")
-def redis_client(logger: TestLogger):
+def redis_config() -> RedisConfig:
+    return settings.REDIS
+
+
+@pytest.fixture(scope="session")
+def redis_client(redis_config: RedisConfig, logger: TestLogger):
     os.environ["REDIS_DB"] = "15"
-    yield init_redis_media_items(logger)
+    yield init_redis_media_items(redis_config, logger)
 
 
 @pytest.fixture

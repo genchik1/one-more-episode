@@ -4,7 +4,7 @@ from src.consts import COLLECTIONS
 from src.domain import pipeline, repositories
 from src.domain.logger import ILogger
 from src.domain.models import ItemFeatures, ItemsCollection
-from src.infrastructure.settings import KinopoiskConfig
+from src.settings import KinopoiskConfig
 
 
 class KinopoiskDataLoaderService:
@@ -12,6 +12,7 @@ class KinopoiskDataLoaderService:
 
     def __init__(
         self,
+        config: KinopoiskConfig(),
         logger: ILogger,
         kinopoisk_repository: repositories.IKinopoiskRepository,
         cache_repository: repositories.IDbRepository,
@@ -22,7 +23,7 @@ class KinopoiskDataLoaderService:
         self._kinopoisk_repo = kinopoisk_repository
         self._cache_repository = cache_repository
         self._file_repository = file_repository
-        self._config = KinopoiskConfig()
+        self._config = config
         self._callable_pipeline_func = callable_pipeline_func
 
     def get_actual_page_number(self) -> int:

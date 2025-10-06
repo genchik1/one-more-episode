@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.interface.api.frontend import frontend
-from src.interface.api.v1 import router
+from src.application.di.container import StoreContainer
+from src.interface.api import frontend, v1
 
 origins = [
     "http://localhost",
@@ -13,14 +13,20 @@ origins = [
 
 
 def create_app() -> FastAPI:
+    container = StoreContainer()
+    container.wire(modules=[v1, frontend])
     app = FastAPI()
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type"],
+        max_age=600,
     )
-    app.include_router(router, prefix="/api/v1")
-    app.include_router(frontend)
+    app.include_router(v1.router, prefix="/api/v1")
+    app.include_router(frontend.frontend)
+    app.state.container = container
     return app
+
+
+app = create_app()

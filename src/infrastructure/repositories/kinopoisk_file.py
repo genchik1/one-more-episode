@@ -1,9 +1,8 @@
-from src.infrastructure.settings import KinopoiskConfig
+from src.settings import KinopoiskConfig
 
 
 class KinopoiskSaveInfoFileRepository:
-    def __init__(self) -> None:
-        config = KinopoiskConfig()
+    def __init__(self, config: KinopoiskConfig) -> None:
         self._file_path = config.info_file_path
         self._default_value = 1
 

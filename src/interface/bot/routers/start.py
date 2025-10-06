@@ -5,7 +5,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, W
 from src.application.commands import CreateUserCommand
 from src.application.di.container import StoreContainer
 from src.interface.bot.messages import Messages
-from src.interface.settings import TG_CONF
+from src.settings import TELEGRAM
 
 start_router = Router()
 
@@ -14,7 +14,7 @@ def get_keyboard() -> InlineKeyboardMarkup:
     keyboard = [
         [
             InlineKeyboardButton(
-                text="Пройти онбординг", web_app=WebAppInfo(url=f"{TG_CONF.url}{TG_CONF.onboarding_page}")
+                text="Пройти онбординг", web_app=WebAppInfo(url=f"{TELEGRAM.url}{TELEGRAM.onboarding_page}")
             )
         ],
     ]

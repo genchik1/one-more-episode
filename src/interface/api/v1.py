@@ -1,16 +1,16 @@
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import APIRouter, HTTPException
+from dependency_injector.wiring import Provide
+from fastapi import APIRouter, Depends, HTTPException
 
 from src.application import commands, use_cases
 from src.application.di.container import StoreContainer
 from src.application.errors import GetFromDBError, InvalidCommandError, PipelineError
+from src.application.pipeline import Pipeline
 from src.consts import KpCollections
 from src.interface.api.dtos import LikeRequest
 
 router = APIRouter()
-container = StoreContainer()
-container.wire(modules=[__name__])
 
 
 @router.get("/health")
@@ -18,11 +18,12 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+async def get_collection_pipeline_depends(slug: KpCollections) -> Pipeline:
+    return await Provide[StoreContainer.get_collection_pipeline].provider(collection_slug=slug)
+
+
 @router.get("/collection/{slug}")
-async def get_collection(
-    slug: KpCollections,
-) -> dict[str, Any]:
-    pipeline = await container.get_collection_pipeline(collection_slug=slug)
+async def get_collection(pipeline: Annotated[Pipeline, Depends(get_collection_pipeline_depends)]) -> dict[str, Any]:
     try:
         collection = await pipeline.execute()
     except PipelineError as err:
@@ -30,9 +31,12 @@ async def get_collection(
     return collection.model_dump(exclude_none=True, exclude_defaults=True)
 
 
+async def get_onboarding_pipeline_depends(slug: KpCollections) -> Pipeline:
+    return await Provide[StoreContainer.get_onboarding_collection_v1_pipeline].provider()
+
+
 @router.get("/onboarding")
-async def get_onboarding() -> dict[str, Any]:
-    pipeline = await container.get_onboarding_collection_v1_pipeline()
+async def get_onboarding(pipeline: Annotated[Pipeline, Depends(get_onboarding_pipeline_depends)]) -> dict[str, Any]:
     try:
         collection = await pipeline.execute()
     except PipelineError as err:
@@ -41,8 +45,10 @@ async def get_onboarding() -> dict[str, Any]:
 
 
 @router.post("/like")
-async def post_like(like_data: LikeRequest):
-    use_case: use_cases.LikeItemUseCase = await container.like_item_use_case()
+async def post_like(
+    like_data: LikeRequest,
+    use_case: Annotated[use_cases.LikeItemUseCase, Depends(Provide[StoreContainer.like_item_use_case])],
+):
     command = commands.LikeItemCommand(user_id=like_data.user_id, item_id=like_data.item_id, action=like_data.rating)
     try:
         await use_case.execute(command)
@@ -53,9 +59,10 @@ async def post_like(like_data: LikeRequest):
 
 
 @router.get("/item/{item_id}")
-async def get_item(item_id: int) -> dict[str, Any]:
-    use_case: use_cases.ItemFeaturesUseCase = await container.item_features_use_case()
-
+async def get_item(
+    item_id: int,
+    use_case: Annotated[use_cases.ItemFeaturesUseCase, Depends(Provide[StoreContainer.item_features_use_case])],
+) -> dict[str, Any]:
     try:
         item = await use_case.get(item_id)
     except GetFromDBError:

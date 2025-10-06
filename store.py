@@ -1,10 +1,10 @@
 import asyncio
 
 import click
-import uvicorn
+import granian
+from granian.constants import Interfaces, Loops
 
 from src.application.di.container import StoreContainer
-from src.interface.api.app import create_app
 from src.interface.bot.main import main as bot_main
 from src.interface.scripts import save_kinopoisk_collections, save_kinopoisk_series
 
@@ -29,13 +29,16 @@ def save_kp_collections():
 
 @click.command()
 def api():
-    uvicorn.run(
-        app=create_app(),
-        host="0.0.0.0",
+    granian.Granian(
+        "src.interface.api.app.py:app",
+        address="0.0.0.0",
         port=8000,
         workers=1,
-        loop="uvloop",
-    )
+        loop=Loops.asyncio,
+        websockets=False,
+        log_level="info",
+        interface=Interfaces.ASGI,
+    ).serve()
 
 
 @click.command()

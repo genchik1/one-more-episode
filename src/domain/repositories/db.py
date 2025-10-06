@@ -1,12 +1,10 @@
-from typing import Any
+from typing import Any, AsyncGenerator
 
 from src.domain.models import ItemFeatures, ItemsCollection, UserFeatures, UserItemFeatures
 
 
 class IDbRepository:
-    async def get_item_features(
-        self, identifiers: list[int], *args: Any, **kwargs: dict[str, Any]
-    ) -> list[ItemFeatures]: ...
+    async def get_item_features(self, identifiers: list[int], features: list[str]) -> list[ItemFeatures]: ...
 
     async def save_item_features(self, collection: list[ItemFeatures]) -> None: ...
 
@@ -25,3 +23,5 @@ class IDbRepository:
     async def save_user_features(self, user_feature: UserFeatures) -> None: ...
 
     async def get_user_features(self, user_id: int, features: list[str]) -> UserFeatures: ...
+
+    async def get_all_item_keys(self) -> AsyncGenerator[str]: ...

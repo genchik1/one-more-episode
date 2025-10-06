@@ -1,23 +1,28 @@
-from fastapi import APIRouter, HTTPException, Request
+from typing import Annotated
+
+from dependency_injector.wiring import Provide
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from src.application.di.container import StoreContainer
 from src.application.errors import PipelineError
+from src.application.pipeline import Pipeline
 from src.consts import PROJECT_ROOT
 from src.interface.api.utils import convert_list_items_to_frontend
 
 frontend = APIRouter()
-container = StoreContainer()
-container.wire(modules=[__name__])
 
 templates = Jinja2Templates(directory=PROJECT_ROOT.joinpath("templates"))
 frontend.mount("/static", StaticFiles(directory=PROJECT_ROOT.joinpath("static")), name="static")
 
 
+async def get_onboarding_pipeline_depends() -> Pipeline:
+    return await Provide[StoreContainer.get_onboarding_collection_v1_pipeline].provider()
+
+
 @frontend.get("/onboarding")
-async def onboarding(request: Request):
-    pipeline = await container.get_onboarding_collection_v1_pipeline()
+async def onboarding(request: Request, pipeline: Annotated[Pipeline, Depends(get_onboarding_pipeline_depends)]):
     try:
         collection = await pipeline.execute()
     except PipelineError as err:

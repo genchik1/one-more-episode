@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
 
+from src import settings
 from src.application import configs, use_cases
 from src.application.services import KinopoiskDataLoaderService
 from src.consts import PROJECT_DOCS_PATH
@@ -12,17 +13,20 @@ class StoreContainer(containers.DeclarativeContainer):
     logging_setup = providers.Resource(setup_logging)
     logger = providers.Factory(StructuredLogger, name="main")
 
-    kinopoisk_api_client = providers.Resource(init_kinopoisk_api)
-    redis_client = providers.Resource(init_redis_media_items, logger=logger)
+    kinopoisk_api_client = providers.Resource(init_kinopoisk_api, config=settings.KINOPOISK)
+    redis_client = providers.Resource(init_redis_media_items, config=settings.REDIS, logger=logger)
 
     kinopoisk_repository = providers.Factory(repositories.KinopoiskRepository, kinopoisk_api_client)
     redis_repository = providers.Factory(repositories.RedisRepository, redis_client)
-    kp_save_info_file_repository = providers.Factory(repositories.KinopoiskSaveInfoFileRepository)
+    kp_save_info_file_repository = providers.Factory(
+        repositories.KinopoiskSaveInfoFileRepository, config=settings.KINOPOISK
+    )
 
     kinopoisk_loader_pipeline_func = providers.Callable(lambda: configs.pipeline_for_kinopoisk_loader)
 
     kinopoisk_data_loader_service = providers.Factory(
         KinopoiskDataLoaderService,
+        config=settings.KINOPOISK,
         logger=logger,
         kinopoisk_repository=kinopoisk_repository,
         cache_repository=redis_repository,

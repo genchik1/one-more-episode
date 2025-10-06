@@ -28,6 +28,26 @@ services:
     env_file:
       - .common.env
 
+  collections:
+    build: .
+    image: my-app:latest
+    command: bash -c "python store.py save-kp-collections"
+    restart: unless-stopped
+    depends_on:
+      - redis
+    env_file:
+      - .common.env
+
+  items:
+    build: .
+    image: my-app:latest
+    command: bash -c "python store.py save-kp-series"
+    restart: unless-stopped
+    depends_on:
+      - redis
+    env_file:
+      - .common.env
+
   nginx:
     image: nginx:alpine
     restart: unless-stopped

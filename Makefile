@@ -1,3 +1,5 @@
+DOCKER_COMPOSE_CMD=docker-compose
+
 lint:
 	ruff check --select I --fix
 
@@ -8,4 +10,13 @@ test-up:
 	docker-compose -f tests/docker-compose.yaml up -d
 
 run-api:
-	docker-compose up
+	$(DOCKER_COMPOSE_CMD) up --force-recreate --build -d api
+
+run-bot:
+	$(DOCKER_COMPOSE_CMD) up --force-recreate --build -d bot
+
+run-load-collections:
+	$(DOCKER_COMPOSE_CMD) up --force-recreate --build collections
+
+run-load-items:
+	$(DOCKER_COMPOSE_CMD) up --force-recreate --build items

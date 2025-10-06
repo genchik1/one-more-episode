@@ -81,3 +81,5 @@ networks:
     name: one-more-episode-store
     driver: bridge
     internal: true
+    driver_opts:
+      com.docker.network.driver.mtu: 1500

@@ -5,6 +5,8 @@ services:
     container_name: redis
     volumes:
       - redis_data:/data
+    networks:
+      - store
 
   api:
     build: .
@@ -17,6 +19,8 @@ services:
       - .common.env
     ports:
       - '8000:8000'
+    networks:
+      - store
 
   bot:
     build: .
@@ -27,6 +31,8 @@ services:
       - redis
     env_file:
       - .common.env
+    networks:
+      - store
 
   collections:
     build: .
@@ -37,6 +43,8 @@ services:
       - redis
     env_file:
       - .common.env
+    networks:
+      - store
 
   items:
     build: .
@@ -47,6 +55,8 @@ services:
       - redis
     env_file:
       - .common.env
+    networks:
+      - store
 
   nginx:
     image: nginx:alpine
@@ -60,6 +70,13 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - api
+    networks:
+      - store
 
 volumes:
   redis_data:
+
+networks:
+  store:
+    driver: bridge
+    internal: true

@@ -78,5 +78,6 @@ volumes:
 
 networks:
   store:
+    name: one-more-episode-store
     driver: bridge
     internal: true

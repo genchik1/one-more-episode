@@ -5,44 +5,38 @@ services:
     container_name: redis
     volumes:
       - redis_data:/data
-    networks:
-      - store
 
   api:
     build: .
     image: my-app:latest
     command: bash -c "python store.py api"
     restart: unless-stopped
-    container_name: api-service  # Явное имя
+    container_name: api-service
     depends_on:
       - redis
     env_file:
       - .common.env
     ports:
       - '8000:8000'
-    networks:
-      - store
 
   bot:
     build: .
     image: my-app:latest
     command: bash -c "python store.py bot"
     restart: unless-stopped
-    container_name: bot-service  # Явное имя
+    container_name: bot-service
     depends_on:
       - redis
       - api
     env_file:
       - .common.env
-    networks:
-      - store
 
   collections:
     build: .
     image: my-app:latest
     command: bash -c "python store.py save-kp-collections"
     restart: unless-stopped
-    container_name: collections-service  # Явное имя
+    container_name: collections-service
     depends_on:
       - redis
       - api
@@ -56,14 +50,12 @@ services:
     image: my-app:latest
     command: bash -c "python store.py save-kp-series"
     restart: unless-stopped
-    container_name: items-service  # Явное имя
+    container_name: items-service
     depends_on:
       - redis
       - api
     env_file:
       - .common.env
-    networks:
-      - store
 
   nginx:
     image: nginx:alpine
@@ -78,13 +70,6 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - api
-    networks:
-      - store
 
 volumes:
   redis_data:
-
-networks:
-  store:
-    name: one-more-episode-store
-    driver: bridge

@@ -9,14 +9,11 @@ fmt:
 test-up:
 	docker-compose -f tests/docker-compose.yaml up -d
 
-run-api:
-	$(DOCKER_COMPOSE_CMD) up --force-recreate --build -d api
-
-run-bot:
-	$(DOCKER_COMPOSE_CMD) up -d bot
+down:
+	$(DOCKER_COMPOSE_CMD) down
 
 run:
-	run-api run-bot
+	$(DOCKER_COMPOSE_CMD) up --force-recreate --build -d api bot
 
 run-load-collections:
 	$(DOCKER_COMPOSE_CMD) up collections

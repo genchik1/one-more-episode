@@ -13,7 +13,7 @@ down:
 	$(DOCKER_COMPOSE_CMD) down
 
 run:
-	$(DOCKER_COMPOSE_CMD) up --force-recreate --build -d api bot
+	$(DOCKER_COMPOSE_CMD) up --force-recreate --build -d api bot nginx
 
 run-load-collections:
 	$(DOCKER_COMPOSE_CMD) up collections

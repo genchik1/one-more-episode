@@ -11,27 +11,18 @@ services:
     image: my-app:latest
     command: bash -c "python store.py api"
     restart: unless-stopped
-    container_name: api-service
     depends_on:
       - redis
     env_file:
       - .common.env
     ports:
       - '8000:8000'
-    volumes:
-      - .:/code
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]  # замените на ваш эндпоинт
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   bot:
     build: .
     image: my-app:latest
     command: bash -c "python store.py bot"
     restart: unless-stopped
-    container_name: bot-service
     depends_on:
       - redis
     env_file:
@@ -42,7 +33,6 @@ services:
     image: my-app:latest
     command: bash -c "python store.py save-kp-collections"
     restart: unless-stopped
-    container_name: collections-service
     depends_on:
       - redis
     env_file:
@@ -53,7 +43,6 @@ services:
     image: my-app:latest
     command: bash -c "python store.py save-kp-series"
     restart: unless-stopped
-    container_name: items-service
     depends_on:
       - redis
     env_file:
@@ -62,7 +51,6 @@ services:
   nginx:
     image: nginx:alpine
     restart: unless-stopped
-    container_name: nginx-proxy
     ports:
       - "80:80"
       - "443:443"

@@ -13,6 +13,7 @@ services:
     image: my-app:latest
     command: bash -c "python store.py api"
     restart: unless-stopped
+    container_name: api-service  # Явное имя
     depends_on:
       - redis
     env_file:
@@ -27,8 +28,10 @@ services:
     image: my-app:latest
     command: bash -c "python store.py bot"
     restart: unless-stopped
+    container_name: bot-service  # Явное имя
     depends_on:
       - redis
+      - api
     env_file:
       - .common.env
     networks:
@@ -39,8 +42,10 @@ services:
     image: my-app:latest
     command: bash -c "python store.py save-kp-collections"
     restart: unless-stopped
+    container_name: collections-service  # Явное имя
     depends_on:
       - redis
+      - api
     env_file:
       - .common.env
     networks:
@@ -51,8 +56,10 @@ services:
     image: my-app:latest
     command: bash -c "python store.py save-kp-series"
     restart: unless-stopped
+    container_name: items-service  # Явное имя
     depends_on:
       - redis
+      - api
     env_file:
       - .common.env
     networks:
@@ -61,6 +68,7 @@ services:
   nginx:
     image: nginx:alpine
     restart: unless-stopped
+    container_name: nginx-proxy
     ports:
       - "80:80"
       - "443:443"
@@ -80,6 +88,3 @@ networks:
   store:
     name: one-more-episode-store
     driver: bridge
-    internal: true
-    driver_opts:
-      com.docker.network.driver.mtu: 1500

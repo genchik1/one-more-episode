@@ -42,8 +42,6 @@ services:
       - api
     env_file:
       - .common.env
-    networks:
-      - store
 
   items:
     build: .

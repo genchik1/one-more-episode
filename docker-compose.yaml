@@ -18,6 +18,8 @@ services:
       - .common.env
     ports:
       - '8000:8000'
+    volumes:
+      - .:/code
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]  # замените на ваш эндпоинт
       interval: 30s

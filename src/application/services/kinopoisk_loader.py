@@ -12,7 +12,7 @@ class KinopoiskDataLoaderService:
 
     def __init__(
         self,
-        config: KinopoiskConfig(),
+        config: KinopoiskConfig,
         logger: ILogger,
         kinopoisk_repository: repositories.IKinopoiskRepository,
         cache_repository: repositories.IDbRepository,
@@ -77,6 +77,7 @@ class KinopoiskDataLoaderService:
                 self._config.x_api_key,
             )
             collection_items_ids.extend(media_item_list)
+            page += 1
             if len(media_item_list) < self._config.limit:
                 break
 

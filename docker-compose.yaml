@@ -18,6 +18,11 @@ services:
       - .common.env
     ports:
       - '8000:8000'
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]  # замените на ваш эндпоинт
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   bot:
     build: .
@@ -27,7 +32,6 @@ services:
     container_name: bot-service
     depends_on:
       - redis
-      - api
     env_file:
       - .common.env
 
@@ -39,7 +43,6 @@ services:
     container_name: collections-service
     depends_on:
       - redis
-      - api
     env_file:
       - .common.env
 
@@ -51,7 +54,6 @@ services:
     container_name: items-service
     depends_on:
       - redis
-      - api
     env_file:
       - .common.env
 

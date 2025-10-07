@@ -2,8 +2,14 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Коллекции сериалов</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="MobileOptimized" content="176"/>
+    <meta name="HandheldFriendly" content="True"/>
+    <meta name="robots" content="noindex,nofollow"/>\
+    <title></title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script> <!--Подключаем скрипт от телеграм-->
     <style>
         * {
             margin: 0;
@@ -17,7 +23,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: var(--tg-theme-bg-color, #ffffff);
             color: #fff;
             overflow: hidden;
             height: 100vh;
@@ -31,62 +37,25 @@
             height: 100%;
             position: relative;
             overflow: hidden;
-            padding: 4vw;
         }
 
-        .collections-vertical {
+        .posters-rail {
+            position: absolute;
             display: flex;
-            flex-direction: column;
-            gap: 6vw;
+            gap: 3vw;
+            padding: 0 4vw;
+            transition: transform 0.1s ease-out;
             height: 100%;
-            overflow-y: auto;
-        }
-
-        .collection {
-            display: flex;
-            flex-direction: column;
-            gap: 3vw;
-        }
-
-        .collection-header {
-            padding: 0 2vw;
-        }
-
-        .collection-title {
-            font-size: 6vw;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
-            margin-bottom: 1vw;
-        }
-
-        .collection-description {
-            font-size: 3.5vw;
-            color: #ecf0f1;
-            text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
-            line-height: 1.4;
-        }
-
-        .posters-horizontal {
-            display: flex;
-            gap: 3vw;
-            padding: 0 2vw;
-            overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        .posters-horizontal::-webkit-scrollbar {
-            display: none;
+            will-change: transform;
         }
 
         .poster {
-            min-width: 35vw;
-            height: 52.5vw;
-            border-radius: 2vw;
+            width: 18vw;
+            height: 27vw;
+            border-radius: 1.5vw;
             cursor: pointer;
             transition: transform 0.2s ease;
-            box-shadow: 0 1vw 2vw rgba(0, 0, 0, 0.4);
+            box-shadow: 0 2vw 4vw rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -94,7 +63,7 @@
             color: white;
             font-weight: 600;
             text-align: center;
-            padding: 1.5vw;
+            padding: 3vw;
             overflow: hidden;
             position: relative;
             flex-shrink: 0;
@@ -107,19 +76,19 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 2vw;
+            border-radius: 3vw;
             z-index: 1;
         }
 
         .poster-title {
-            font-size: 3.2vw;
+            font-size: 4.5vw;
             text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.9);
             z-index: 2;
             background: rgba(0, 0, 0, 0.8);
-            padding: 1.5vw 2vw;
-            border-radius: 1.5vw;
+            padding: 2vw 3vw;
+            border-radius: 2vw;
             width: 95%;
-            margin-bottom: 1vw;
+            margin-bottom: 1.5vw;
             line-height: 1.2;
         }
 
@@ -127,7 +96,6 @@
             transform: scale(0.95);
         }
 
-        /* Стили для увеличенного постера */
         .poster-expanded {
             position: fixed;
             top: 50%;
@@ -176,21 +144,21 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding: 0 4vw 20vh 4vw;
+            padding: 0;
         }
 
         .poster-content-wrapper {
             display: flex;
             flex-direction: column;
             gap: 3vw;
-            margin-bottom: 6vh;
+            margin-bottom: 0;
         }
 
         .poster-actions-center {
             display: flex;
             justify-content: center;
             gap: 4vw;
-            margin-bottom: 2vw;
+            margin-bottom: 0;
         }
 
         .action-btn {
@@ -243,8 +211,8 @@
         }
 
         .poster-info-title {
-            font-size: 6vw;
-            margin-bottom: 3vw;
+            font-size: 5vw;
+            margin-bottom: 1vw;
             font-weight: bold;
             color: #fff;
             text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
@@ -254,32 +222,34 @@
         .poster-info-rating {
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin-bottom: 4vw;
+            justify-content: left;
+            margin-bottom: 0;
             gap: 3vw;
+            padding: 1vw;
         }
 
         .rating-stars {
             color: #ffc107;
-            font-size: 5vw;
+            font-size: 4vw;
             text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
         }
 
         .rating-value {
             font-weight: bold;
-            font-size: 4.5vw;
+            font-size: 4vw;
             color: #fff;
             text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
         }
 
         .poster-info-description {
-            font-size: 4vw;
+            font-size: 3vw;
             line-height: 1.4;
             color: #ecf0f1;
             text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
             max-height: 20vh;
             overflow-y: auto;
-            text-align: center;
+            text-align: left;
+            padding: 1vw;
         }
 
         .overlay {
@@ -300,39 +270,18 @@
             pointer-events: all;
         }
 
-        /* Адаптация для ландшафтной ориентации */
+        /* Адаптация для разных ориентаций */
         @media (orientation: landscape) {
-            .container {
-                padding: 2vw;
-            }
-
-            .collections-vertical {
-                gap: 3vw;
-            }
-
-            .collection {
-                gap: 1.5vw;
-            }
-
-            .collection-title {
-                font-size: 3vw;
-            }
-
-            .collection-description {
-                font-size: 1.8vw;
-            }
-
-            .posters-horizontal {
-                gap: 2vw;
+            .header-title {
+                font-size: 4vw;
             }
 
             .poster {
-                min-width: 20vw;
-                height: 30vw;
+                width: 25vw;
             }
 
             .poster-title {
-                font-size: 1.8vw;
+                font-size: 3.5vw;
             }
 
             .poster-expanded {
@@ -375,7 +324,39 @@
 
             .poster-actions-center {
                 gap: 3vw;
-                margin-bottom: 1.5vw;
+                margin-bottom: 0;
+            }
+        }
+
+        /* Для очень маленьких экранов */
+        @media (max-width: 320px) {
+            .header-title {
+                font-size: 7vw;
+            }
+
+            .poster {
+                width: 40vw;
+            }
+
+            .poster-title {
+                font-size: 4vw;
+            }
+
+            .poster-expanded {
+                width: 90vw;
+                height: 70vh;
+            }
+
+            .poster-expanded-overlay {
+                padding: 0 4vw 18vh 4vw;
+            }
+
+            .poster-info-title {
+                font-size: 5vw;
+            }
+
+            .poster-info-description {
+                font-size: 3.5vw;
             }
         }
 
@@ -392,19 +373,50 @@
 </head>
 <body>
     <div class="container">
-        <div class="collections-vertical" id="collectionsVertical">
-            <!-- Коллекции будут созданы через JavaScript -->
+        <div class="header">
+            <div class="header-title">Онбординг</div>
+        </div>
+        <div class="rail-container">
+            <div class="posters-rail" id="postersRail">
+                {% for series in series_data %}
+                <div class="poster" data-id="{{ series.id }}">
+                    <img src="{{ series.image }}" alt="{{ series.title }}" class="poster-image">
+                    <div class="poster-title">{{ series.title }}</div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
     <div class="overlay" id="overlay"></div>
 
     <script>
-        // Данные коллекций и сериалов
-        const collectionsData = [];
+        window.Telegram.WebApp.ready();
+        let userId = 100000;
+
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+          const user = window.Telegram.WebApp.initDataUnsafe.user;
+          if (user && user.id) {
+            userId = user.id;
+          }
+        }
+
+        const seriesData = {{ series_data|tojson }};
 
         // Элементы DOM
-        const collectionsVertical = document.getElementById('collectionsVertical');
+        const postersRail = document.getElementById('postersRail');
         const overlay = document.getElementById('overlay');
+
+        // Переменные для горизонтального перетаскивания
+        let isDragging = false;
+        let startX;
+        let currentX = 0;
+        let velocityX = 0;
+        let lastX = 0;
+        let lastTime = 0;
+        let animationFrame;
+
+        // Границы для ограничения перемещения (только по горизонтали)
+        let minX = 0, maxX = 0;
 
         // Функция для отправки событий лайков
         async function sendLikeEvent(seriesId, action) {
@@ -415,9 +427,9 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        series_id: seriesId,
-                        action: action,
-                        timestamp: new Date().toISOString()
+                        item_id: seriesId,
+                        rating: action,
+                        user_id: userId,
                     })
                 });
 
@@ -433,60 +445,43 @@
             }
         }
 
-        // Создаем вертикальные коллекции с горизонтальными постерами
-        function createCollections() {
-            collectionsVertical.innerHTML = '';
+        // Вычисляем границы перемещения (только горизонтальные)
+        function calculateBounds() {
+            const railRect = postersRail.getBoundingClientRect();
+            const containerRect = postersRail.parentElement.getBoundingClientRect();
 
-            collectionsData.forEach((collection, index) => {
-                // Создаем коллекцию
-                const collectionElement = document.createElement('div');
-                collectionElement.className = 'collection';
-                collectionElement.dataset.index = index;
+            const railWidth = railRect.width;
+            const containerWidth = containerRect.width;
 
-                // Заголовок коллекции
-                const header = document.createElement('div');
-                header.className = 'collection-header';
+            minX = -(railWidth - containerWidth);
+            maxX = 0;
 
-                const title = document.createElement('div');
-                title.className = 'collection-title';
-                title.textContent = collection.title;
+            // Если рейл меньше контейнера, центрируем его
+            if (railWidth <= containerWidth) {
+                minX = maxX = (containerWidth - railWidth) / 2;
+            }
+        }
 
-                const description = document.createElement('div');
-                description.className = 'collection-description';
-                description.textContent = collection.description;
+        // Центрируем рейл по горизонтали
+        function centerRail() {
+            const railRect = postersRail.getBoundingClientRect();
+            const containerRect = postersRail.parentElement.getBoundingClientRect();
 
-                header.appendChild(title);
-                header.appendChild(description);
+            const railWidth = railRect.width;
+            const containerWidth = containerRect.width;
 
-                // Горизонтальный контейнер с постерами
-                const postersHorizontal = document.createElement('div');
-                postersHorizontal.className = 'posters-horizontal';
+            // Центрируем только если контент шире контейнера
+            if (railWidth > containerWidth) {
+                currentX = 0;
+            } else {
+                currentX = (containerWidth - railWidth) / 2;
+            }
 
-                // Создаем постеры
-                collection.series.forEach(series => {
-                    const posterElement = document.createElement('div');
-                    posterElement.className = 'poster';
-                    posterElement.dataset.id = series.id;
-                    posterElement.dataset.collection = collection.id;
+            postersRail.style.transform = `translateX(${currentX}px)`;
 
-                    const posterImage = document.createElement('img');
-                    posterImage.className = 'poster-image';
-                    posterImage.src = series.image;
-                    posterImage.alt = series.title;
-
-                    const posterTitle = document.createElement('div');
-                    posterTitle.className = 'poster-title';
-                    posterTitle.textContent = series.title;
-
-                    posterElement.appendChild(posterImage);
-                    posterElement.appendChild(posterTitle);
-                    postersHorizontal.appendChild(posterElement);
-                });
-
-                collectionElement.appendChild(header);
-                collectionElement.appendChild(postersHorizontal);
-                collectionsVertical.appendChild(collectionElement);
-            });
+            setTimeout(() => {
+                calculateBounds();
+            }, 100);
         }
 
         // Функция для создания звезд рейтинга
@@ -519,13 +514,14 @@
         function setupPosterEvents() {
             document.querySelectorAll('.poster').forEach(poster => {
                 poster.addEventListener('click', function(e) {
+                    // Если был горизонтальный драг, не открываем постер
+                    if (Math.abs(velocityX) > 2) {
+                        return;
+                    }
+
                     e.stopPropagation();
                     const seriesId = parseInt(this.dataset.id);
-                    const collectionId = parseInt(this.dataset.collection);
-
-                    // Находим сериал в данных
-                    const collection = collectionsData.find(c => c.id === collectionId);
-                    const series = collection.series.find(s => s.id === seriesId);
+                    const series = seriesData.find(s => s.id === seriesId);
 
                     if (series && !currentExpandedPoster) {
                         currentSeriesId = seriesId;
@@ -545,7 +541,7 @@
             // Создаем изображение
             const expandedImage = document.createElement('img');
             expandedImage.className = 'poster-expanded-image';
-            expandedImage.src = series.image;
+            expandedImage.src = series.image_full;
             expandedImage.alt = series.title;
 
             // Создаем оверлей с контентом
@@ -680,7 +676,10 @@
                 }, 300);
             }
 
+            // Закрытие по клику на оверлей
             overlay.addEventListener('click', closeExpandedPoster);
+
+            // Закрытие по клику на сам постер
             expandedPoster.addEventListener('click', function(e) {
                 if (e.target === expandedPoster || e.target === expandedImage) {
                     closeExpandedPoster();
@@ -688,20 +687,119 @@
             });
         }
 
+        // Ограничиваем позицию в пределах границ (только по горизонтали)
+        function clampPosition(x) {
+            const elasticity = 0.3;
+
+            let clampedX = x;
+
+            if (x > maxX) {
+                clampedX = maxX + (x - maxX) * elasticity;
+            } else if (x < minX) {
+                clampedX = minX + (x - minX) * elasticity;
+            }
+
+            return clampedX;
+        }
+
+        // Функции для горизонтального перетаскивания
+        function startDrag(e) {
+            isDragging = true;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+
+            startX = clientX - currentX;
+            velocityX = 0;
+            lastX = currentX;
+            lastTime = Date.now();
+
+            cancelAnimationFrame(animationFrame);
+        }
+
+        function duringDrag(e) {
+            if (!isDragging) return;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+
+            let newX = clientX - startX;
+            newX = clampPosition(newX);
+
+            currentX = newX;
+
+            const currentTime = Date.now();
+            const deltaTime = currentTime - lastTime;
+
+            if (deltaTime > 0) {
+                velocityX = (currentX - lastX) / deltaTime;
+            }
+
+            lastX = currentX;
+            lastTime = currentTime;
+
+            postersRail.style.transform = `translateX(${currentX}px)`;
+        }
+
+        function endDrag() {
+            isDragging = false;
+
+            if (Math.abs(velocityX) > 0.1) {
+                applyInertia();
+            }
+        }
+
+        function applyInertia() {
+            const friction = 0.92;
+
+            let newX = currentX + velocityX * 16;
+            newX = clampPosition(newX);
+
+            if (newX === currentX || Math.abs(newX - currentX) < 0.5) velocityX = 0;
+
+            currentX = newX;
+            velocityX *= friction;
+
+            postersRail.style.transform = `translateX(${currentX}px)`;
+
+            if (Math.abs(velocityX) > 0.1) {
+                animationFrame = requestAnimationFrame(applyInertia);
+            }
+        }
+
+        // Настройка событий перетаскивания
+        function setupDragEvents() {
+            postersRail.addEventListener('touchstart', startDrag);
+            postersRail.addEventListener('touchmove', duringDrag);
+            postersRail.addEventListener('touchend', endDrag);
+
+            postersRail.addEventListener('mousedown', startDrag);
+            postersRail.addEventListener('mousemove', duringDrag);
+            postersRail.addEventListener('mouseup', endDrag);
+            postersRail.addEventListener('mouseleave', endDrag);
+        }
+
+        // Предотвращаем скролл страницы
+        document.addEventListener('touchmove', (e) => {
+            if (e.target === document.body || e.target === document.documentElement) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
         // Инициализация
         function init() {
-            createCollections();
             setupPosterEvents();
+            setupDragEvents();
+
+            setTimeout(() => {
+                centerRail();
+            }, 100);
+
+            window.addEventListener('resize', () => {
+                centerRail();
+                calculateBounds();
+            });
         }
 
         // Запускаем при загрузке
         document.addEventListener('DOMContentLoaded', init);
-
-        // Инициализация Telegram WebApp
-        if (window.Telegram && window.Telegram.WebApp) {
-            Telegram.WebApp.expand();
-            Telegram.WebApp.enableClosingConfirmation();
-        }
     </script>
 </body>
 </html>

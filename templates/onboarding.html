@@ -39,13 +39,16 @@
             overflow: hidden;
         }
 
-        .posters-rail {
+        .posters-container {
             position: absolute;
-            display: flex;
-            gap: 3vw;
-            padding: 0 4vw;
+            display: grid;
+            grid-template-columns: repeat(10, 18vw);
+            grid-template-rows: repeat(10, 27vw);
+            gap: 2vw;
+            padding: 3vw;
             transition: transform 0.1s ease-out;
-            height: 100%;
+            width: max-content;
+            height: max-content;
             will-change: transform;
         }
 
@@ -55,7 +58,7 @@
             border-radius: 1.5vw;
             cursor: pointer;
             transition: transform 0.2s ease;
-            box-shadow: 0 2vw 4vw rgba(0, 0, 0, 0.3);
+            box-shadow: 0 1vw 2vw rgba(0, 0, 0, 0.4);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -63,10 +66,9 @@
             color: white;
             font-weight: 600;
             text-align: center;
-            padding: 3vw;
+            padding: 1.2vw;
             overflow: hidden;
             position: relative;
-            flex-shrink: 0;
         }
 
         .poster-image {
@@ -76,19 +78,19 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 3vw;
+            border-radius: 1.5vw;
             z-index: 1;
         }
 
         .poster-title {
-            font-size: 4.5vw;
+            font-size: 2.5vw;
             text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.9);
             z-index: 2;
             background: rgba(0, 0, 0, 0.8);
-            padding: 2vw 3vw;
-            border-radius: 2vw;
+            padding: 1.2vw 1.5vw;
+            border-radius: 1.2vw;
             width: 95%;
-            margin-bottom: 1.5vw;
+            margin-bottom: 0.8vw;
             line-height: 1.2;
         }
 
@@ -272,18 +274,6 @@
 
         /* Адаптация для разных ориентаций */
         @media (orientation: landscape) {
-            .header-title {
-                font-size: 4vw;
-            }
-
-            .poster {
-                width: 25vw;
-            }
-
-            .poster-title {
-                font-size: 3.5vw;
-            }
-
             .poster-expanded {
                 width: 70vw;
                 height: 80vh;
@@ -330,16 +320,13 @@
 
         /* Для очень маленьких экранов */
         @media (max-width: 320px) {
-            .header-title {
-                font-size: 7vw;
-            }
-
             .poster {
-                width: 40vw;
+                width: 20vw;
+                height: 30vw;
             }
 
             .poster-title {
-                font-size: 4vw;
+                font-size: 2.2vw;
             }
 
             .poster-expanded {
@@ -373,50 +360,51 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="header-title">Онбординг</div>
-        </div>
-        <div class="rail-container">
-            <div class="posters-rail" id="postersRail">
-                {% for series in series_data %}
-                <div class="poster" data-id="{{ series.id }}">
-                    <img src="{{ series.image }}" alt="{{ series.title }}" class="poster-image">
-                    <div class="poster-title">{{ series.title }}</div>
-                </div>
-                {% endfor %}
+        <div class="posters-container" id="postersContainer">
+            {% for series in series_data %}
+            <div class="poster" data-id="{{ series.id }}">
+                <img src="{{ series.image }}" alt="{{ series.title }}" class="poster-image">
+                <div class="poster-title">{{ series.title }}</div>
             </div>
+            {% endfor %}
         </div>
     </div>
     <div class="overlay" id="overlay"></div>
 
     <script>
-        window.Telegram.WebApp.ready();
-        let userId = 100000;
+        // Данные сериалов из Jinja2 - используем безопасный JSON
 
+        window.Telegram.WebApp.ready();
         if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
           const user = window.Telegram.WebApp.initDataUnsafe.user;
           if (user && user.id) {
             userId = user.id;
+          } else {
+            // Default value if user data or user ID is not present
+            userId = 111111;
           }
+        } else {
+          // Default value if Telegram Web App API is not available (e.g., opened outside Telegram)
+          userId = 100000;
         }
 
         const seriesData = {{ series_data|tojson }};
 
         // Элементы DOM
-        const postersRail = document.getElementById('postersRail');
+        const postersContainer = document.getElementById('postersContainer');
         const overlay = document.getElementById('overlay');
 
-        // Переменные для горизонтального перетаскивания
+        // Переменные для перетаскивания
         let isDragging = false;
-        let startX;
-        let currentX = 0;
-        let velocityX = 0;
-        let lastX = 0;
+        let startX, startY;
+        let currentX = 0, currentY = 0;
+        let velocityX = 0, velocityY = 0;
+        let lastX = 0, lastY = 0;
         let lastTime = 0;
         let animationFrame;
 
-        // Границы для ограничения перемещения (только по горизонтали)
-        let minX = 0, maxX = 0;
+        // Границы для ограничения перемещения
+        let minX = 0, maxX = 0, minY = 0, maxY = 0;
 
         // Функция для отправки событий лайков
         async function sendLikeEvent(seriesId, action) {
@@ -442,43 +430,75 @@
                 return data;
             } catch (error) {
                 console.error('Error sending like event:', error);
+                // Можно добавить повторную попытку или уведомление пользователя
             }
         }
 
-        // Вычисляем границы перемещения (только горизонтальные)
+        // Вычисляем границы перемещения
         function calculateBounds() {
-            const railRect = postersRail.getBoundingClientRect();
-            const containerRect = postersRail.parentElement.getBoundingClientRect();
+            // Получаем реальные размеры контейнера с постерами
+            const containerRect = postersContainer.getBoundingClientRect();
 
-            const railWidth = railRect.width;
-            const containerWidth = containerRect.width;
+            // Размеры видимой области (окна браузера)
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
 
-            minX = -(railWidth - containerWidth);
+            // Размеры всего контейнера с постерами
+            const gridWidth = containerRect.width;
+            const gridHeight = containerRect.height;
+
+            // Вычисляем границы перемещения
+            // Не позволяем уходить дальше краев сетки
+            minX = -(gridWidth - screenWidth);
             maxX = 0;
+            minY = -(gridHeight - screenHeight);
+            maxY = 0;
 
-            // Если рейл меньше контейнера, центрируем его
-            if (railWidth <= containerWidth) {
-                minX = maxX = (containerWidth - railWidth) / 2;
+            // Если сетка меньше экрана, центрируем ее
+            if (gridWidth <= screenWidth) {
+                minX = maxX = (screenWidth - gridWidth) / 2;
+            }
+            if (gridHeight <= screenHeight) {
+                minY = maxY = (screenHeight - gridHeight) / 2;
             }
         }
 
-        // Центрируем рейл по горизонтали
-        function centerRail() {
-            const railRect = postersRail.getBoundingClientRect();
-            const containerRect = postersRail.parentElement.getBoundingClientRect();
+        // Центрируем сетку так, чтобы центр массива был в центре экрана
+        function centerGrid() {
+            // Получаем реальные размеры контейнера
+            const containerRect = postersContainer.getBoundingClientRect();
 
-            const railWidth = railRect.width;
-            const containerWidth = containerRect.width;
+            // Размеры видимой области
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
 
-            // Центрируем только если контент шире контейнера
-            if (railWidth > containerWidth) {
-                currentX = 0;
-            } else {
-                currentX = (containerWidth - railWidth) / 2;
-            }
+            // Размеры всего контейнера с постерами
+            const gridWidth = containerRect.width;
+            const gridHeight = containerRect.height;
 
-            postersRail.style.transform = `translateX(${currentX}px)`;
+            // Центр сетки (центр всего массива постеров)
+            const gridCenterX = gridWidth / 2;
+            const gridCenterY = gridHeight / 2;
 
+            // Центр экрана
+            const screenCenterX = screenWidth / 2;
+            const screenCenterY = screenHeight / 2;
+
+            // Вычисляем смещение, чтобы центр сетки был в центре экрана
+            const targetX = screenCenterX - gridCenterX;
+            const targetY = screenCenterY - gridCenterY;
+
+            // Устанавливаем позицию контейнера
+            postersContainer.style.left = '0px';
+            postersContainer.style.top = '0px';
+
+            // Используем transform для позиционирования
+            currentX = targetX;
+            currentY = targetY;
+
+            postersContainer.style.transform = `translate(${currentX}px, ${currentY}px)`;
+
+            // Пересчитываем границы после позиционирования
             setTimeout(() => {
                 calculateBounds();
             }, 100);
@@ -514,8 +534,8 @@
         function setupPosterEvents() {
             document.querySelectorAll('.poster').forEach(poster => {
                 poster.addEventListener('click', function(e) {
-                    // Если был горизонтальный драг, не открываем постер
-                    if (Math.abs(velocityX) > 2) {
+                    // Если был драг (перемещение), не открываем постер
+                    if (Math.abs(velocityX) > 2 || Math.abs(velocityY) > 2) {
                         return;
                     }
 
@@ -630,6 +650,7 @@
                 this.classList.toggle('active');
                 dislikeBtn.classList.remove('active');
 
+                // Отправляем событие лайка
                 if (!wasActive) {
                     sendLikeEvent(currentSeriesId, 'like');
                 } else {
@@ -643,6 +664,7 @@
                 this.classList.toggle('active');
                 likeBtn.classList.remove('active');
 
+                // Отправляем событие дизлайка
                 if (!wasActive) {
                     sendLikeEvent(currentSeriesId, 'dislike');
                 } else {
@@ -655,6 +677,7 @@
                 const wasActive = this.classList.contains('active');
                 this.classList.toggle('active');
 
+                // Отправляем событие закладки
                 if (!wasActive) {
                     sendLikeEvent(currentSeriesId, 'bookmark');
                 } else {
@@ -687,11 +710,12 @@
             });
         }
 
-        // Ограничиваем позицию в пределах границ (только по горизонтали)
-        function clampPosition(x) {
+        // Ограничиваем позицию в пределах границ
+        function clampPosition(x, y) {
             const elasticity = 0.3;
 
             let clampedX = x;
+            let clampedY = y;
 
             if (x > maxX) {
                 clampedX = maxX + (x - maxX) * elasticity;
@@ -699,17 +723,30 @@
                 clampedX = minX + (x - minX) * elasticity;
             }
 
-            return clampedX;
+            if (y > maxY) {
+                clampedY = maxY + (y - maxY) * elasticity;
+            } else if (y < minY) {
+                clampedY = minY + (y - minY) * elasticity;
+            }
+
+            return {
+                x: clampedX,
+                y: clampedY
+            };
         }
 
-        // Функции для горизонтального перетаскивания
+        // Функции для перетаскивания
         function startDrag(e) {
             isDragging = true;
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
             startX = clientX - currentX;
+            startY = clientY - currentY;
             velocityX = 0;
+            velocityY = 0;
             lastX = currentX;
+            lastY = currentY;
             lastTime = Date.now();
 
             cancelAnimationFrame(animationFrame);
@@ -719,29 +756,37 @@
             if (!isDragging) return;
 
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
             let newX = clientX - startX;
-            newX = clampPosition(newX);
+            let newY = clientY - startY;
+
+            const clamped = clampPosition(newX, newY);
+            newX = clamped.x;
+            newY = clamped.y;
 
             currentX = newX;
+            currentY = newY;
 
             const currentTime = Date.now();
             const deltaTime = currentTime - lastTime;
 
             if (deltaTime > 0) {
                 velocityX = (currentX - lastX) / deltaTime;
+                velocityY = (currentY - lastY) / deltaTime;
             }
 
             lastX = currentX;
+            lastY = currentY;
             lastTime = currentTime;
 
-            postersRail.style.transform = `translateX(${currentX}px)`;
+            postersContainer.style.transform = `translate(${currentX}px, ${currentY}px)`;
         }
 
         function endDrag() {
             isDragging = false;
 
-            if (Math.abs(velocityX) > 0.1) {
+            if (Math.abs(velocityX) > 0.1 || Math.abs(velocityY) > 0.1) {
                 applyInertia();
             }
         }
@@ -750,30 +795,38 @@
             const friction = 0.92;
 
             let newX = currentX + velocityX * 16;
-            newX = clampPosition(newX);
+            let newY = currentY + velocityY * 16;
+
+            const clamped = clampPosition(newX, newY);
+            newX = clamped.x;
+            newY = clamped.y;
 
             if (newX === currentX || Math.abs(newX - currentX) < 0.5) velocityX = 0;
+            if (newY === currentY || Math.abs(newY - currentY) < 0.5) velocityY = 0;
 
             currentX = newX;
+            currentY = newY;
+
             velocityX *= friction;
+            velocityY *= friction;
 
-            postersRail.style.transform = `translateX(${currentX}px)`;
+            postersContainer.style.transform = `translate(${currentX}px, ${currentY}px)`;
 
-            if (Math.abs(velocityX) > 0.1) {
+            if (Math.abs(velocityX) > 0.1 || Math.abs(velocityY) > 0.1) {
                 animationFrame = requestAnimationFrame(applyInertia);
             }
         }
 
         // Настройка событий перетаскивания
         function setupDragEvents() {
-            postersRail.addEventListener('touchstart', startDrag);
-            postersRail.addEventListener('touchmove', duringDrag);
-            postersRail.addEventListener('touchend', endDrag);
+            postersContainer.addEventListener('touchstart', startDrag);
+            postersContainer.addEventListener('touchmove', duringDrag);
+            postersContainer.addEventListener('touchend', endDrag);
 
-            postersRail.addEventListener('mousedown', startDrag);
-            postersRail.addEventListener('mousemove', duringDrag);
-            postersRail.addEventListener('mouseup', endDrag);
-            postersRail.addEventListener('mouseleave', endDrag);
+            postersContainer.addEventListener('mousedown', startDrag);
+            postersContainer.addEventListener('mousemove', duringDrag);
+            postersContainer.addEventListener('mouseup', endDrag);
+            postersContainer.addEventListener('mouseleave', endDrag);
         }
 
         // Предотвращаем скролл страницы
@@ -789,17 +842,18 @@
             setupDragEvents();
 
             setTimeout(() => {
-                centerRail();
+                centerGrid();
             }, 100);
 
             window.addEventListener('resize', () => {
-                centerRail();
+                centerGrid();
                 calculateBounds();
             });
         }
 
         // Запускаем при загрузке
         document.addEventListener('DOMContentLoaded', init);
+
     </script>
 </body>
 </html>

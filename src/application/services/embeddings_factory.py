@@ -80,7 +80,7 @@ class EmbeddingsFactoryService:
         return self.TEMPLATE.format(**dict_for_template)
 
     def _generate_missing_embeddings(self) -> None:
-        count_series = list(self._series_list)
+        count_series = len(self._series_list)
         self._logger.info("start generate_missing_embeddings", extra={"count_series": count_series})
         for step, series in enumerate(self._series_list, 1):
             if series.id in self._series_embeddings:

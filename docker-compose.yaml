@@ -61,5 +61,12 @@ services:
     depends_on:
       - api
 
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    depends_on:
+      - api
+
 volumes:
   redis_data:

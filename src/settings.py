@@ -27,7 +27,7 @@ class TgConfig(BaseSettings):
 
 class MlConfig(BaseSettings):
     embeddings_file: Path = PROJECT_DOCS_PATH.joinpath("embedding.pkl")
-    base_url: str = "http://localhost:11434"
+    base_url: str = Field(default="http://localhost:11434", alias="OLLAMA_URL")
     model: str = "nomic-embed-text"
 
 

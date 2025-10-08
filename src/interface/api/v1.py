@@ -9,6 +9,7 @@ from src.application.errors import GetFromDBError, InvalidCommandError, Pipeline
 from src.application.pipeline import Pipeline
 from src.consts import KpCollections
 from src.interface.api.dtos import LikeRequest
+from src.interface.api.utils import convert_list_items_to_frontend
 
 router = APIRouter()
 
@@ -95,3 +96,24 @@ async def search(
     except PipelineError as err:
         raise HTTPException(status_code=404, detail=str(err))
     return collection.model_dump(exclude_none=True, exclude_defaults=True)
+
+
+async def _get_user_bookmarks_pipeline_depends(user_id: int) -> Pipeline:
+    stage_meta = commands.PersonalMetaCommand(user_id=user_id)
+    return await Provide[StoreContainer.get_user_bookmarks_pipeline].provider(stage_meta=stage_meta)
+
+
+@router.get("/bookmarks/{user_id}")
+async def get_bookmarks(
+    pipeline: Annotated[Pipeline, Depends(_get_user_bookmarks_pipeline_depends)],
+) -> dict[str, Any]:
+    try:
+        collection = await pipeline.execute()
+    except PipelineError as err:
+        raise HTTPException(status_code=404, detail=str(err))
+
+    series_data = [
+        item.model_dump(exclude_none=True, exclude_defaults=True)
+        for item in convert_list_items_to_frontend(collection.items)
+    ]
+    return {"items": series_data}

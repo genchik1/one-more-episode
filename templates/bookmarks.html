@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="MobileOptimized" content="176"/>
+    <meta name="HandheldFriendly" content="True"/>
+    <meta name="robots" content="noindex,nofollow"/>\
+    <title></title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script> <!--Подключаем скрипт от телеграм-->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            touch-action: none;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 4vw;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .header-title {
+            font-size: 6vw;
+            font-weight: bold;
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        .posters-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .posters-grid {
+            position: absolute;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3vw;
+            padding: 4vw;
+            transition: transform 0.1s ease-out;
+            width: 100%;
+            will-change: transform;
+        }
+
+        .poster {
+            width: 100%;
+            aspect-ratio: 2/3;
+            border-radius: 2vw;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2vw 4vw rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            padding: 3vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .poster-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 2vw;
+            z-index: 1;
+        }
+
+        .poster-title {
+            font-size: 4.5vw;
+            text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.9);
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 2vw 3vw;
+            border-radius: 2vw;
+            width: 95%;
+            margin-bottom: 1.5vw;
+            line-height: 1.2;
+        }
+
+        .poster:active {
+            transform: scale(0.95);
+        }
+
+        .poster-expanded {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 85vw;
+            height: 75vh;
+            background: #000;
+            z-index: 100;
+            border-radius: 4vw;
+            overflow: hidden;
+            box-shadow: 0 4vw 8vw rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .poster-expanded.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .poster-expanded-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .poster-expanded-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0.3) 0%,
+                rgba(0, 0, 0, 0.4) 30%,
+                rgba(0, 0, 0, 0.7) 60%,
+                rgba(0, 0, 0, 0.9) 100%
+            );
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 0;
+        }
+
+        .poster-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 3vw;
+            margin-bottom: 0;
+        }
+
+        .poster-actions-center {
+            display: flex;
+            justify-content: center;
+            gap: 4vw;
+            margin-bottom: 0;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 5vw;
+            cursor: pointer;
+            padding: 2.5vw;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 12vw;
+            height: 12vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .action-btn:active {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(0.95);
+        }
+
+        .action-btn.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2c3e50;
+            transform: scale(1.05);
+        }
+
+        .like-btn.active {
+            background: rgba(231, 76, 60, 0.9);
+            color: #fff;
+        }
+
+        .dislike-btn.active {
+            background: rgba(52, 152, 219, 0.9);
+            color: #fff;
+        }
+
+        .bookmark-btn.active {
+            background: rgba(243, 156, 18, 0.9);
+            color: #fff;
+        }
+
+        .poster-info-content {
+            text-align: center;
+        }
+
+        .poster-info-title {
+            font-size: 5vw;
+            margin-bottom: 1vw;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
+            line-height: 1.2;
+        }
+
+        .poster-info-rating {
+            display: flex;
+            align-items: center;
+            justify-content: left;
+            margin-bottom: 0;
+            gap: 3vw;
+            padding: 1vw;
+        }
+
+        .rating-stars {
+            color: #ffc107;
+            font-size: 4vw;
+            text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
+        }
+
+        .rating-value {
+            font-weight: bold;
+            font-size: 4vw;
+            color: #fff;
+            text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
+        }
+
+        .poster-info-description {
+            font-size: 3vw;
+            line-height: 1.4;
+            color: #ecf0f1;
+            text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.8);
+            max-height: 20vh;
+            overflow-y: auto;
+            text-align: left;
+            padding: 1vw;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Адаптация для разных ориентаций */
+        @media (orientation: landscape) {
+            .header-title {
+                font-size: 4vw;
+            }
+
+            .poster {
+                width: 100%;
+            }
+
+            .poster-title {
+                font-size: 3.5vw;
+            }
+
+            .poster-expanded {
+                width: 70vw;
+                height: 80vh;
+            }
+
+            .poster-expanded-overlay {
+                padding: 0 3vw 15vh 3vw;
+            }
+
+            .poster-content-wrapper {
+                gap: 2vw;
+                margin-bottom: 4vh;
+            }
+
+            .poster-info-title {
+                font-size: 3.5vw;
+            }
+
+            .poster-info-description {
+                font-size: 2.2vw;
+                max-height: 15vh;
+            }
+
+            .action-btn {
+                font-size: 3vw;
+                width: 8vw;
+                height: 8vw;
+                padding: 1.5vw;
+            }
+
+            .rating-stars {
+                font-size: 3vw;
+            }
+
+            .rating-value {
+                font-size: 2.8vw;
+            }
+
+            .poster-actions-center {
+                gap: 3vw;
+                margin-bottom: 0;
+            }
+        }
+
+        /* Для очень маленьких экранов */
+        @media (max-width: 320px) {
+            .header-title {
+                font-size: 7vw;
+            }
+
+            .poster {
+                width: 100%;
+            }
+
+            .poster-title {
+                font-size: 4vw;
+            }
+
+            .poster-expanded {
+                width: 90vw;
+                height: 70vh;
+            }
+
+            .poster-expanded-overlay {
+                padding: 0 4vw 18vh 4vw;
+            }
+
+            .poster-info-title {
+                font-size: 5vw;
+            }
+
+            .poster-info-description {
+                font-size: 3.5vw;
+            }
+        }
+
+        /* Скрываем scrollbar для описания */
+        .poster-info-description::-webkit-scrollbar {
+            display: none;
+        }
+
+        .poster-info-description {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="posters-container">
+            <!-- Изначально показываем загрузку -->
+            <div class="loading" id="loading">
+                Загрузка...
+            </div>
+            <!-- Сетка постеров будет заполнена через JavaScript -->
+            <div class="posters-grid" id="postersGrid" style="display: none;"></div>
+    </div>
+    <div class="overlay" id="overlay"></div>
+
+    <script>
+        window.Telegram.WebApp.ready();
+        let userId = 100000;
+
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+          const user = window.Telegram.WebApp.initDataUnsafe.user;
+          if (user && user.id) {
+            userId = user.id;
+          }
+        }
+
+
+        // Элементы DOM
+        const postersGrid = document.getElementById('postersGrid');
+        const loadingElement = document.getElementById('loading');
+        const overlay = document.getElementById('overlay');
+
+        // Переменные для вертикального перетаскивания
+        let isDragging = false;
+        let startY;
+        let currentY = 0;
+        let velocityY = 0;
+        let lastY = 0;
+        let lastTime = 0;
+        let animationFrame;
+
+        // Границы для ограничения перемещения (только по вертикали)
+        let minY = 0, maxY = 0;
+
+        let seriesData = [];
+
+        // Функция для загрузки персональной коллекции
+        async function loadPersonalCollection() {
+            try {
+                console.log('Загрузка персональной коллекции для user_id:', userId);
+
+                const response = await fetch('https://one-more-episode.ru/api/v1/bookmarks/${userId}', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Получены данные:', data);
+
+                return data.items || [];
+            } catch (error) {
+                console.error('Ошибка загрузки коллекции:', error);
+                // В случае ошибки можно показать заглушки или сообщение об ошибке
+                return [];
+            }
+        }
+
+        // Функция для отправки событий лайков
+        async function sendLikeEvent(seriesId, action) {
+            try {
+                const response = await fetch('/api/v1/like', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        item_id: seriesId,
+                        rating: action,
+                        user_id: userId,
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                console.log('Like event sent successfully:', data);
+                return data;
+            } catch (error) {
+                console.error('Error sending like event:', error);
+            }
+        }
+
+        // Вычисляем границы перемещения (только вертикальные)
+        function calculateBounds() {
+            const gridRect = postersGrid.getBoundingClientRect();
+            const containerRect = postersGrid.parentElement.getBoundingClientRect();
+
+            const gridHeight = gridRect.height;
+            const containerHeight = containerRect.height;
+
+            minY = -(gridHeight - containerHeight);
+            maxY = 0;
+
+            // Если грид меньше контейнера, центрируем его
+            if (gridHeight <= containerHeight) {
+                minY = maxY = (containerHeight - gridHeight) / 2;
+            }
+        }
+
+        // Функция для создания звезд рейтинга
+        function createRatingStars(rating) {
+            const fullStars = Math.floor(rating / 2);
+            const halfStar = rating % 2 >= 1 ? 1 : 0;
+            const emptyStars = 5 - fullStars - halfStar;
+
+            let starsHTML = '';
+
+            for (let i = 0; i < fullStars; i++) {
+                starsHTML += '★';
+            }
+
+            if (halfStar) {
+                starsHTML += '½';
+            }
+
+            for (let i = 0; i < emptyStars; i++) {
+                starsHTML += '☆';
+            }
+
+            return starsHTML;
+        }
+
+        let currentExpandedPoster = null;
+        let currentSeriesId = null;
+
+        // Создание постеров в сетке
+        function createPostersGrid() {
+            postersGrid.innerHTML = '';
+
+            if (seriesData.length === 0) {
+                postersGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--tg-theme-text-color, #000); padding: 20vw;">Нет данных для отображения</div>';
+                return;
+            }
+
+            seriesData.forEach(series => {
+                const poster = document.createElement('div');
+                poster.className = 'poster';
+                poster.dataset.id = series.id;
+
+                const posterImage = document.createElement('img');
+                posterImage.className = 'poster-image';
+                posterImage.src = series.image;
+                posterImage.alt = series.title;
+
+                const posterTitle = document.createElement('div');
+                posterTitle.className = 'poster-title';
+                posterTitle.textContent = series.title;
+
+                poster.appendChild(posterImage);
+                poster.appendChild(posterTitle);
+                postersGrid.appendChild(poster);
+            });
+        }
+
+        // Обработчики событий для постеров
+        function setupPosterEvents() {
+            document.querySelectorAll('.poster').forEach(poster => {
+                poster.addEventListener('click', function(e) {
+                    // Если был вертикальный драг, не открываем постер
+                    if (Math.abs(velocityY) > 2) {
+                        return;
+                    }
+
+                    e.stopPropagation();
+                    const seriesId = parseInt(this.dataset.id);
+                    const series = seriesData.find(s => s.id === seriesId);
+
+                    if (series && !currentExpandedPoster) {
+                        currentSeriesId = seriesId;
+                        expandPoster(series);
+                    }
+                });
+            });
+        }
+
+        // Функция для увеличения постера
+        function expandPoster(series) {
+            // Создаем элемент для увеличенного просмотра
+            const expandedPoster = document.createElement('div');
+            expandedPoster.className = 'poster-expanded';
+            currentExpandedPoster = expandedPoster;
+
+            // Создаем изображение
+            const expandedImage = document.createElement('img');
+            expandedImage.className = 'poster-expanded-image';
+            expandedImage.src = series.image_full;
+            expandedImage.alt = series.title;
+
+            // Создаем оверлей с контентом
+            const posterOverlay = document.createElement('div');
+            posterOverlay.className = 'poster-expanded-overlay';
+
+            // Создаем обертку для контента
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'poster-content-wrapper';
+
+            // Создаем кнопки действий (по центру)
+            const actionsCenter = document.createElement('div');
+            actionsCenter.className = 'poster-actions-center';
+
+            const likeBtn = document.createElement('button');
+            likeBtn.className = 'action-btn like-btn';
+            likeBtn.innerHTML = '👍';
+
+            const dislikeBtn = document.createElement('button');
+            dislikeBtn.className = 'action-btn dislike-btn';
+            dislikeBtn.innerHTML = '👎';
+
+            const bookmarkBtn = document.createElement('button');
+            bookmarkBtn.className = 'action-btn bookmark-btn';
+            bookmarkBtn.innerHTML = '🔖';
+
+            actionsCenter.appendChild(likeBtn);
+            actionsCenter.appendChild(dislikeBtn);
+            actionsCenter.appendChild(bookmarkBtn);
+
+            // Создаем информационный блок
+            const posterInfo = document.createElement('div');
+            posterInfo.className = 'poster-info-content';
+
+            const title = document.createElement('div');
+            title.className = 'poster-info-title';
+            title.textContent = series.title;
+
+            const rating = document.createElement('div');
+            rating.className = 'poster-info-rating';
+
+            const stars = document.createElement('span');
+            stars.className = 'rating-stars';
+            stars.innerHTML = createRatingStars(series.rating);
+
+            const value = document.createElement('span');
+            value.className = 'rating-value';
+            value.textContent = series.rating.toFixed(1);
+
+            rating.appendChild(stars);
+            rating.appendChild(value);
+
+            const description = document.createElement('div');
+            description.className = 'poster-info-description';
+            description.textContent = series.description;
+
+            // Собираем информационный блок
+            posterInfo.appendChild(title);
+            posterInfo.appendChild(rating);
+            posterInfo.appendChild(description);
+
+            // Собираем контент
+            contentWrapper.appendChild(actionsCenter);
+            contentWrapper.appendChild(posterInfo);
+
+            // Собираем оверлей
+            posterOverlay.appendChild(contentWrapper);
+
+            // Собираем весь постер
+            expandedPoster.appendChild(expandedImage);
+            expandedPoster.appendChild(posterOverlay);
+
+            // Добавляем увеличенный постер на страницу
+            document.body.appendChild(expandedPoster);
+            overlay.classList.add('active');
+
+            // Анимация появления
+            setTimeout(() => {
+                expandedPoster.classList.add('active');
+            }, 10);
+
+            // Обработчики для кнопок действий с отправкой событий
+            likeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const wasActive = this.classList.contains('active');
+                this.classList.toggle('active');
+                dislikeBtn.classList.remove('active');
+
+                if (!wasActive) {
+                    sendLikeEvent(currentSeriesId, 'like');
+                } else {
+                    sendLikeEvent(currentSeriesId, 'unlike');
+                }
+            });
+
+            dislikeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const wasActive = this.classList.contains('active');
+                this.classList.toggle('active');
+                likeBtn.classList.remove('active');
+
+                if (!wasActive) {
+                    sendLikeEvent(currentSeriesId, 'dislike');
+                } else {
+                    sendLikeEvent(currentSeriesId, 'undislike');
+                }
+            });
+
+            bookmarkBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const wasActive = this.classList.contains('active');
+                this.classList.toggle('active');
+
+                if (!wasActive) {
+                    sendLikeEvent(currentSeriesId, 'bookmark');
+                } else {
+                    sendLikeEvent(currentSeriesId, 'unbookmark');
+                }
+            });
+
+            // Функция закрытия
+            function closeExpandedPoster() {
+                expandedPoster.classList.remove('active');
+                overlay.classList.remove('active');
+
+                setTimeout(() => {
+                    if (expandedPoster.parentNode) {
+                        document.body.removeChild(expandedPoster);
+                    }
+                    currentExpandedPoster = null;
+                    currentSeriesId = null;
+                }, 300);
+            }
+
+            // Закрытие по клику на оверлей
+            overlay.addEventListener('click', closeExpandedPoster);
+
+            // Закрытие по клику на сам постер
+            expandedPoster.addEventListener('click', function(e) {
+                if (e.target === expandedPoster || e.target === expandedImage) {
+                    closeExpandedPoster();
+                }
+            });
+        }
+
+        // Ограничиваем позицию в пределах границ (только по вертикали)
+        function clampPosition(y) {
+            const elasticity = 0.3;
+
+            let clampedY = y;
+
+            if (y > maxY) {
+                clampedY = maxY + (y - maxY) * elasticity;
+            } else if (y < minY) {
+                clampedY = minY + (y - minY) * elasticity;
+            }
+
+            return clampedY;
+        }
+
+        // Функции для вертикального перетаскивания
+        function startDrag(e) {
+            isDragging = true;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            startY = clientY - currentY;
+            velocityY = 0;
+            lastY = currentY;
+            lastTime = Date.now();
+
+            cancelAnimationFrame(animationFrame);
+        }
+
+        function duringDrag(e) {
+            if (!isDragging) return;
+
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            let newY = clientY - startY;
+            newY = clampPosition(newY);
+
+            currentY = newY;
+
+            const currentTime = Date.now();
+            const deltaTime = currentTime - lastTime;
+
+            if (deltaTime > 0) {
+                velocityY = (currentY - lastY) / deltaTime;
+            }
+
+            lastY = currentY;
+            lastTime = currentTime;
+
+            postersGrid.style.transform = `translateY(${currentY}px)`;
+        }
+
+        function endDrag() {
+            isDragging = false;
+
+            if (Math.abs(velocityY) > 0.1) {
+                applyInertia();
+            }
+        }
+
+        function applyInertia() {
+            const friction = 0.92;
+
+            let newY = currentY + velocityY * 16;
+            newY = clampPosition(newY);
+
+            if (newY === currentY || Math.abs(newY - currentY) < 0.5) velocityY = 0;
+
+            currentY = newY;
+            velocityY *= friction;
+
+            postersGrid.style.transform = `translateY(${currentY}px)`;
+
+            if (Math.abs(velocityY) > 0.1) {
+                animationFrame = requestAnimationFrame(applyInertia);
+            }
+        }
+
+        // Настройка событий перетаскивания
+        function setupDragEvents() {
+            postersGrid.addEventListener('touchstart', startDrag);
+            postersGrid.addEventListener('touchmove', duringDrag);
+            postersGrid.addEventListener('touchend', endDrag);
+
+            postersGrid.addEventListener('mousedown', startDrag);
+            postersGrid.addEventListener('mousemove', duringDrag);
+            postersGrid.addEventListener('mouseup', endDrag);
+            postersGrid.addEventListener('mouseleave', endDrag);
+        }
+
+        // Предотвращаем скролл страницы
+        document.addEventListener('touchmove', (e) => {
+            if (e.target === document.body || e.target === document.documentElement) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Основная функция инициализации
+        async function init() {
+            try {
+                // Загружаем персональную коллекцию
+                seriesData = await loadPersonalCollection();
+
+                // Скрываем индикатор загрузки
+                loadingElement.style.display = 'none';
+
+                // Показываем сетку и заполняем её
+                postersGrid.style.display = 'grid';
+                createPostersGrid();
+                setupPosterEvents();
+                setupDragEvents();
+
+                // Рассчитываем границы после загрузки контента
+                setTimeout(() => {
+                    calculateBounds();
+                }, 100);
+
+                window.addEventListener('resize', calculateBounds);
+
+            } catch (error) {
+                console.error('Ошибка инициализации:', error);
+                loadingElement.textContent = 'Ошибка загрузки данных';
+            }
+        }
+
+        // Запускаем при загрузке
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

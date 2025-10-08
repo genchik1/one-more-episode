@@ -45,7 +45,6 @@ class StoreContainer(containers.DeclarativeContainer):
         configs.pipeline_get_onboarding_v1,
         logger=logger,
         cache_repository=redis_repository,
-        file_repository=onboarding_json_file_repository,
     )
 
     like_item_use_case = providers.Factory(use_cases.LikeItemUseCase, cache_repository=redis_repository, logger=logger)
@@ -73,6 +72,11 @@ class StoreContainer(containers.DeclarativeContainer):
     get_search_recommendation_pipeline = providers.Factory(
         configs.pipeline_get_search_recommendations,
         recommendation_service=series_recommendation_service,
+        cache_repository=redis_repository,
+        stage_meta=providers.Dependency(),
+    )
+    get_user_bookmarks_pipeline = providers.Factory(
+        configs.pipeline_get_user_bookmarks,
         cache_repository=redis_repository,
         stage_meta=providers.Dependency(),
     )

@@ -7,7 +7,7 @@ import orjson
 
 
 class StructuredLogger:
-    def __init__(self, logger):
+    def __init__(self, logger: logging.Logger) -> None:
         self._logger = logger
 
     def debug(self, message: str, **kwargs) -> None:
@@ -30,11 +30,10 @@ class JSONFormatter(logging.Formatter):
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
-            "module": record.module,
-            "function": record.funcName,
-            "line": record.lineno,
         }
 
+        if record.extra:
+            log_entry.update(**record.extra)
         if record.args:
             if isinstance(record.args, dict):
                 log_entry.update(record.args)

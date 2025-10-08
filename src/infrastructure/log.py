@@ -31,7 +31,7 @@ class JSONFormatter(logging.Formatter):
             "message": record.getMessage(),
         }
 
-        if record.extra:
+        if record.__getattribute__("extra"):
             log_entry.update(**record.extra)
         if record.args:
             if isinstance(record.args, dict):

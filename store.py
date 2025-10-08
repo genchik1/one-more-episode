@@ -5,11 +5,11 @@ import granian
 from granian.constants import Interfaces, Loops
 
 from src.application.di.container import StoreContainer
+from src.interface import scripts
 from src.interface.bot.main import main as bot_main
-from src.interface.scripts import create_embeddings, save_embeddings, save_kinopoisk_collections, save_kinopoisk_series
 
 container = StoreContainer()
-container.wire(modules=[__name__, create_embeddings])
+container.wire(modules=[__name__, scripts.create_embeddings, scripts.send_messages])
 
 
 @click.group()
@@ -19,12 +19,12 @@ def run():
 
 @click.command()
 def save_kp_series():
-    asyncio.run(save_kinopoisk_series())
+    asyncio.run(scripts.save_kinopoisk_series())
 
 
 @click.command()
 def save_kp_collections():
-    asyncio.run(save_kinopoisk_collections())
+    asyncio.run(scripts.save_kinopoisk_collections())
 
 
 @click.command()
@@ -50,7 +50,12 @@ def bot():
 
 @click.command()
 def create_embeddings():
-    asyncio.run(save_embeddings())
+    asyncio.run(scripts.save_embeddings())
+
+
+@click.command()
+def send_messages():
+    asyncio.run(scripts.send_messages_to_bot())
 
 
 run.add_command(save_kp_series)
@@ -58,6 +63,7 @@ run.add_command(save_kp_collections)
 run.add_command(api)
 run.add_command(bot)
 run.add_command(create_embeddings)
+run.add_command(send_messages)
 
 
 if __name__ == "__main__":

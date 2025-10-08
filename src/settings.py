@@ -23,6 +23,7 @@ class TgConfig(BaseSettings):
     token: str = Field(default="", alias="TG_BOT_TOKEN")
     url: str = Field(default="one-more-episode.ru/", alias="TG_WEB_APP_URL")
     onboarding_page: str = "/onboarding"
+    api_url: str = "https://api.telegram.org/bot{token}"
 
 
 class MlConfig(BaseSettings):

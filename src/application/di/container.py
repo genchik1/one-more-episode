@@ -80,3 +80,8 @@ class StoreContainer(containers.DeclarativeContainer):
         cache_repository=redis_repository,
         stage_meta=providers.Dependency(),
     )
+    telegram_api_client = providers.Resource(
+        external.TelegramApiClient,
+        api_url=settings.TELEGRAM.api_url.format(token=settings.TELEGRAM.token),  # FIXME
+    )
+    user_interaction_service = providers.Factory(services.UserInteractionService, client=telegram_api_client)

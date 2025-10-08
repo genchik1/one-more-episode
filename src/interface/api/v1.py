@@ -3,7 +3,7 @@ from typing import Annotated, Any
 from dependency_injector.wiring import Provide
 from fastapi import APIRouter, Depends, HTTPException
 
-from src.application import commands, use_cases
+from src.application import commands, services, use_cases
 from src.application.di.container import StoreContainer
 from src.application.errors import GetFromDBError, InvalidCommandError, PipelineError
 from src.application.pipeline import Pipeline
@@ -31,7 +31,7 @@ async def get_collection(pipeline: Annotated[Pipeline, Depends(get_collection_pi
     return collection.model_dump(exclude_none=True, exclude_defaults=True)
 
 
-async def get_onboarding_pipeline_depends(slug: KpCollections) -> Pipeline:
+async def get_onboarding_pipeline_depends() -> Pipeline:
     return await Provide[StoreContainer.get_onboarding_collection_v1_pipeline].provider()
 
 
@@ -44,10 +44,14 @@ async def get_onboarding(pipeline: Annotated[Pipeline, Depends(get_onboarding_pi
     return collection.model_dump(exclude_none=True, exclude_defaults=True)
 
 
+async def get_like_item_use_case() -> use_cases.LikeItemUseCase:
+    return await Provide[StoreContainer.like_item_use_case].provider()
+
+
 @router.post("/like")
 async def post_like(
     like_data: LikeRequest,
-    use_case: Annotated[use_cases.LikeItemUseCase, Depends(Provide[StoreContainer.like_item_use_case])],
+    use_case: Annotated[use_cases.LikeItemUseCase, Depends(get_like_item_use_case)],
 ):
     command = commands.LikeItemCommand(user_id=like_data.user_id, item_id=like_data.item_id, action=like_data.rating)
     try:
@@ -58,10 +62,14 @@ async def post_like(
         raise HTTPException(status_code=400)
 
 
+async def get_item_features_use_case() -> use_cases.ItemFeaturesUseCase:
+    return await Provide[StoreContainer.item_features_use_case].provider()
+
+
 @router.get("/item/{item_id}")
 async def get_item(
     item_id: int,
-    use_case: Annotated[use_cases.ItemFeaturesUseCase, Depends(Provide[StoreContainer.item_features_use_case])],
+    use_case: Annotated[use_cases.ItemFeaturesUseCase, Depends(get_item_features_use_case)],
 ) -> dict[str, Any]:
     try:
         item = await use_case.get(item_id)
@@ -71,3 +79,16 @@ async def get_item(
         raise HTTPException(status_code=400)
 
     return item.model_dump(exclude_none=True, exclude_defaults=True)
+
+
+async def get_series_recommendation_service() -> use_cases.ItemFeaturesUseCase:
+    return await Provide[StoreContainer.series_recommendation_service].provider()
+
+
+@router.post("/search")
+async def search(
+    text: str,
+    service: Annotated[services.SeriesRecommendationService, Depends(get_series_recommendation_service)],
+):
+    await service.load()
+    return service.predict(text, 5)

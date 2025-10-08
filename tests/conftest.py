@@ -92,7 +92,7 @@ def redis_config() -> RedisConfig:
 
 @pytest.fixture(scope="session")
 def redis_client(redis_config: RedisConfig, logger: TestLogger):
-    os.environ["REDIS_DB"] = "15"
+    redis_config.media_item_db = 15
     yield init_redis_media_items(redis_config, logger)
 
 

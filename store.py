@@ -37,6 +37,8 @@ def api():
         loop=Loops.asyncio,
         websockets=False,
         log_level="info",
+        log_access=True,
+        log_enabled=True,
         interface=Interfaces.ASGI,
     ).serve()
 

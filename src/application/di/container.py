@@ -1,10 +1,9 @@
 from dependency_injector import containers, providers
 
 from src import settings
-from src.application import configs, use_cases
-from src.application.services import KinopoiskDataLoaderService
+from src.application import configs, services, use_cases
 from src.consts import PROJECT_DOCS_PATH
-from src.infrastructure import repositories
+from src.infrastructure import external, repositories
 from src.infrastructure.external.clients import init_kinopoisk_api, init_redis_media_items
 from src.infrastructure.log import StructuredLogger, setup_logging
 
@@ -25,7 +24,7 @@ class StoreContainer(containers.DeclarativeContainer):
     kinopoisk_loader_pipeline_func = providers.Callable(lambda: configs.pipeline_for_kinopoisk_loader)
 
     kinopoisk_data_loader_service = providers.Factory(
-        KinopoiskDataLoaderService,
+        services.KinopoiskDataLoaderService,
         config=settings.KINOPOISK,
         logger=logger,
         kinopoisk_repository=kinopoisk_repository,
@@ -52,3 +51,16 @@ class StoreContainer(containers.DeclarativeContainer):
     like_item_use_case = providers.Factory(use_cases.LikeItemUseCase, cache_repository=redis_repository, logger=logger)
     item_features_use_case = providers.Factory(use_cases.ItemFeaturesUseCase, cache_repository=redis_repository)
     create_user_use_case = providers.Factory(use_cases.CreateUserUseCase, cache_repository=redis_repository)
+
+    embedding_provider = providers.Singleton(
+        external.OllamaEmbeddingProvider, base_url=settings.ML_CONFIG.base_url, model=settings.ML_CONFIG.model
+    )
+    embedding_repository = providers.Singleton(
+        repositories.FileEmbeddingRepository, file_path=settings.ML_CONFIG.embeddings_file
+    )
+    series_recommendation_service = providers.Singleton(
+        services.SeriesRecommendationService,
+        series_repository=redis_repository,
+        file_embedding=embedding_repository,
+        embedding_provider=embedding_provider,
+    )

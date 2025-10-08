@@ -1,4 +1,4 @@
-from typing import Any, Generator
+from typing import Any, AsyncGenerator
 
 import orjson
 import redis.asyncio as redis
@@ -154,10 +154,10 @@ class RedisRepository:
                 user_data[feature] = orjson.loads(value)
         return UserFeatures(**user_data)
 
-    async def get_all_item_keys(self, batch_size: int = 300) -> Generator[list[str]]:
+    async def get_all_item_ids(self, batch_size: int = 300) -> AsyncGenerator[list[int]]:
         batch = []
-        async for key in self._client.keys(self._item_key_prefix):
-            batch.append(key)
+        for key in await self._client.keys(f'{self._item_key_prefix}*'):
+            batch.append(int(key.replace(self._item_key_prefix, '')))
             if len(batch) == batch_size:
                 yield batch
                 batch = []

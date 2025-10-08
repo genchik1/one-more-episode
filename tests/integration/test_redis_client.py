@@ -28,7 +28,7 @@ def user_features() -> list[UserFeatures]:
 
 
 async def test_redis_item_features_repository(
-    redis_client: redis.Redis, media_item_collection: list[ItemFeatures], cache_repository: RedisRepository
+    media_item_collection: list[ItemFeatures], cache_repository: RedisRepository
 ) -> None:
     await cache_repository.save_item_features(media_item_collection)
 
@@ -43,7 +43,7 @@ async def test_redis_item_features_repository(
 
 
 async def test_redis_user_item_features_repository(
-    redis_client: redis.Redis, user_item_features: list[UserItemFeatures], cache_repository: RedisRepository
+    user_item_features: list[UserItemFeatures], cache_repository: RedisRepository
 ) -> None:
     await cache_repository.save_user_item_features(user_item_features)
 
@@ -56,7 +56,7 @@ async def test_redis_user_item_features_repository(
 
 
 async def test_redis_user_features_repository(
-    redis_client: redis.Redis, user_features: list[UserFeatures], cache_repository: RedisRepository
+    user_features: list[UserFeatures], cache_repository: RedisRepository
 ) -> None:
     await cache_repository.save_user_features(user_features[0])
     await cache_repository.save_user_features(user_features[1])
@@ -70,3 +70,8 @@ async def test_redis_user_features_repository(
     result = await cache_repository.get_user_features(first_user.user_id, features=["username", "is_viewed_series"])
     assert result.username == first_user.username
     assert result.is_viewed_series == True
+
+
+async def test_get_keys(item_features: ItemFeatures, cache_repository: RedisRepository):
+    await cache_repository.save_item_features([item_features])
+    assert [key async for key in cache_repository.get_all_item_ids()] == [[item_features.id]]

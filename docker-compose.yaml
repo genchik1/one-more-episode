@@ -17,6 +17,8 @@ services:
       - .common.env
     ports:
       - '8000:8000'
+    volumes:
+      - ./:/code
 
   bot:
     build: .
@@ -27,6 +29,8 @@ services:
       - redis
     env_file:
       - .common.env
+    volumes:
+      - ./:/code
 
   collections:
     build: .
@@ -37,6 +41,8 @@ services:
       - redis
     env_file:
       - .common.env
+    volumes:
+      - ./:/code
 
   items:
     build: .
@@ -47,6 +53,8 @@ services:
       - redis
     env_file:
       - .common.env
+    volumes:
+      - ./:/code
 
   nginx:
     image: nginx:alpine

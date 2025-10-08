@@ -16,6 +16,7 @@ class SeriesRecommendationService:
         self._embedding_provider = embedding_provider
         self._embedding_matrix: list[float] = []
         self._series_ids: list[int] = []
+        self.load()
 
     def load(self) -> None:
         embeddings = self._embeddings_factory_service.get()

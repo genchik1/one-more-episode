@@ -67,6 +67,12 @@ class StoreContainer(containers.DeclarativeContainer):
     )
     series_recommendation_service = providers.Singleton(
         services.SeriesRecommendationService,
-        sembeddings_factory_service=embeddings_factory_service,
+        embeddings_factory_service=embeddings_factory_service,
         embedding_provider=embedding_provider,
+    )
+    get_search_recommendation_pipeline = providers.Factory(
+        configs.pipeline_get_search_recommendations,
+        recommendation_service=series_recommendation_service,
+        cache_repository=redis_repository,
+        stage_meta=providers.Dependency(),
     )

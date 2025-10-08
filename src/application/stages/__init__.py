@@ -2,6 +2,8 @@ from src.application.stages.filter_by_rating import FilterByRatingStage
 from src.application.stages.filter_without_image import FilterWithoutPreviewUrlStage
 from src.application.stages.get_collection import GetCollectionStage
 from src.application.stages.get_onboarding_collection_v1 import GetOnboardingCollectionV1Stage
+from src.application.stages.get_search_recommendations import GetSearchRecommendationsStage
+from src.application.stages.load_item_features import LoadItemFeaturesStage
 from src.application.stages.set_collection import AddCollectionStage
 
 __all__ = [
@@ -10,4 +12,6 @@ __all__ = [
     "GetCollectionStage",
     "GetOnboardingCollectionV1Stage",
     "FilterWithoutPreviewUrlStage",
+    "LoadItemFeaturesStage",
+    "GetSearchRecommendationsStage",
 ]

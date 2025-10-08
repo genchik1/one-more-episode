@@ -42,8 +42,11 @@ class EmbeddingsFactoryService:
 
     def get(self) -> dict[int, list[float]]:
         if not self._series_embeddings:
+            self._series_embeddings = self._file_embedding.get_all_embeddings()
+        if not self._series_embeddings:
             self._logger.info("Not exists embeddings")
             raise DoesNotExistsDataError("Not exists embeddings")
+        self._logger.info("Load embeddings")
         return self._series_embeddings
 
     async def load(self) -> None:

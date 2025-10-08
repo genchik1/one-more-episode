@@ -18,12 +18,12 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-async def get_collection_pipeline_depends(slug: KpCollections) -> Pipeline:
+async def _get_collection_pipeline_depends(slug: KpCollections) -> Pipeline:
     return await Provide[StoreContainer.get_collection_pipeline].provider(collection_slug=slug)
 
 
 @router.get("/collection/{slug}")
-async def get_collection(pipeline: Annotated[Pipeline, Depends(get_collection_pipeline_depends)]) -> dict[str, Any]:
+async def get_collection(pipeline: Annotated[Pipeline, Depends(_get_collection_pipeline_depends)]) -> dict[str, Any]:
     try:
         collection = await pipeline.execute()
     except PipelineError as err:
@@ -31,12 +31,12 @@ async def get_collection(pipeline: Annotated[Pipeline, Depends(get_collection_pi
     return collection.model_dump(exclude_none=True, exclude_defaults=True)
 
 
-async def get_onboarding_pipeline_depends() -> Pipeline:
+async def _get_onboarding_pipeline_depends() -> Pipeline:
     return await Provide[StoreContainer.get_onboarding_collection_v1_pipeline].provider()
 
 
 @router.get("/onboarding")
-async def get_onboarding(pipeline: Annotated[Pipeline, Depends(get_onboarding_pipeline_depends)]) -> dict[str, Any]:
+async def get_onboarding(pipeline: Annotated[Pipeline, Depends(_get_onboarding_pipeline_depends)]) -> dict[str, Any]:
     try:
         collection = await pipeline.execute()
     except PipelineError as err:
@@ -44,14 +44,14 @@ async def get_onboarding(pipeline: Annotated[Pipeline, Depends(get_onboarding_pi
     return collection.model_dump(exclude_none=True, exclude_defaults=True)
 
 
-async def get_like_item_use_case() -> use_cases.LikeItemUseCase:
+async def _get_like_item_use_case() -> use_cases.LikeItemUseCase:
     return await Provide[StoreContainer.like_item_use_case].provider()
 
 
 @router.post("/like")
 async def post_like(
     like_data: LikeRequest,
-    use_case: Annotated[use_cases.LikeItemUseCase, Depends(get_like_item_use_case)],
+    use_case: Annotated[use_cases.LikeItemUseCase, Depends(_get_like_item_use_case)],
 ):
     command = commands.LikeItemCommand(user_id=like_data.user_id, item_id=like_data.item_id, action=like_data.rating)
     try:
@@ -62,14 +62,14 @@ async def post_like(
         raise HTTPException(status_code=400)
 
 
-async def get_item_features_use_case() -> use_cases.ItemFeaturesUseCase:
+async def _get_item_features_use_case() -> use_cases.ItemFeaturesUseCase:
     return await Provide[StoreContainer.item_features_use_case].provider()
 
 
 @router.get("/item/{item_id}")
 async def get_item(
     item_id: int,
-    use_case: Annotated[use_cases.ItemFeaturesUseCase, Depends(get_item_features_use_case)],
+    use_case: Annotated[use_cases.ItemFeaturesUseCase, Depends(_get_item_features_use_case)],
 ) -> dict[str, Any]:
     try:
         item = await use_case.get(item_id)
@@ -81,14 +81,17 @@ async def get_item(
     return item.model_dump(exclude_none=True, exclude_defaults=True)
 
 
-async def get_series_recommendation_service() -> use_cases.ItemFeaturesUseCase:
-    return await Provide[StoreContainer.series_recommendation_service].provider()
+async def _get_collection_pipeline_depends(text: str) -> Pipeline:
+    stage_meta = commands.StageMetaCommand(search_query=text)
+    return await Provide[StoreContainer.get_search_recommendation_pipeline].provider(stage_meta=stage_meta)
 
 
 @router.post("/search")
 async def search(
-    text: str,
-    service: Annotated[services.SeriesRecommendationService, Depends(get_series_recommendation_service)],
+    pipeline: Annotated[Pipeline, Depends(_get_collection_pipeline_depends)],
 ):
-    await service.load()
-    return service.predict(text, 5)
+    try:
+        collection = await pipeline.execute()
+    except PipelineError as err:
+        raise HTTPException(status_code=404, detail=str(err))
+    return collection.model_dump(exclude_none=True, exclude_defaults=True)

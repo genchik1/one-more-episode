@@ -156,8 +156,8 @@ class RedisRepository:
 
     async def get_all_item_ids(self, batch_size: int = 300) -> AsyncGenerator[list[int]]:
         batch = []
-        for key in await self._client.keys(f'{self._item_key_prefix}*'):
-            batch.append(int(key.replace(self._item_key_prefix, '')))
+        for key in await self._client.keys(f"{self._item_key_prefix}*"):
+            batch.append(int(key.replace(self._item_key_prefix, "")))
             if len(batch) == batch_size:
                 yield batch
                 batch = []

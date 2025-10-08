@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from typing import NamedTuple
 
 
-class LikeItemCommand(BaseModel):
+class LikeItemCommand(NamedTuple):
     user_id: int
     item_id: int
     action: str

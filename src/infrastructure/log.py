@@ -7,20 +7,20 @@ import orjson
 
 
 class StructuredLogger:
-    def __init__(self, name: str):
-        self._logger = logging.getLogger(name)
+    def __init__(self, logger):
+        self._logger = logger
 
     def debug(self, message: str, **kwargs) -> None:
-        self._logger.debug(message, extra={"extra_fields": kwargs})
+        self._logger.debug(message, extra={"extra": kwargs})
 
     def info(self, message: str, **kwargs) -> None:
-        self._logger.info(message, extra={"extra_fields": kwargs})
+        self._logger.info(message, extra={"extra": kwargs})
 
     def warning(self, message: str, **kwargs) -> None:
-        self._logger.warning(message, extra={"extra_fields": kwargs})
+        self._logger.warning(message, extra={"extra": kwargs})
 
     def error(self, message: str, **kwargs) -> None:
-        self._logger.error(message, extra={"extra_fields": kwargs})
+        self._logger.error(message, extra={"extra": kwargs})
 
 
 class JSONFormatter(logging.Formatter):
@@ -50,7 +50,7 @@ class JSONFormatter(logging.Formatter):
         return orjson.dumps(log_entry).decode("utf-8")
 
 
-def setup_logging(level: str = "INFO", json_output: bool = True) -> None:
+def setup_logging(level: str = "INFO", json_output: bool = True) -> logging.Logger:
     if json_output:
         formatter = JSONFormatter()
     else:
@@ -60,7 +60,7 @@ def setup_logging(level: str = "INFO", json_output: bool = True) -> None:
     console_handler.setFormatter(formatter)
 
     root_logger = logging.getLogger()
-    root_logger.setLevel(getattr(logging, level.upper()))
+    root_logger.setLevel(level)
 
     for handler in root_logger.handlers[:]:
         root_logger.removeHandler(handler)
@@ -68,3 +68,5 @@ def setup_logging(level: str = "INFO", json_output: bool = True) -> None:
     root_logger.addHandler(console_handler)
 
     logging.getLogger("requests").setLevel(logging.WARNING)
+
+    return root_logger

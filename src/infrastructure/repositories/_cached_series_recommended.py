@@ -1,10 +1,12 @@
 import pickle
-from typing import Generator
+from typing import Final, Generator
 
 import redis
+import requests
 
 from src.domain import repositories
 from src.domain.models import ItemFeatures
+from src.settings import MlConfig
 
 
 class SimpleSeriesRecommendedService:
@@ -73,38 +75,38 @@ class SimpleSeriesRecommendedService:
 
 
 class CachedSeriesRecommenderRepository:
-    def __init__(self, cache_repository: repositories.IDbRepository) -> None:
-        self._cache_file = cache_file_name
-        self._series_data = []
-        self._embeddings = []
+    ITEM_FIELDS: Final[list[str]] = [
+        "id",
+        "genres",
+        "name",
+        "persons",
+        "short_description",
+        "description",
+        "slogan",
+        "en_name",
+    ]
+
+    def __init__(self, config: MlConfig, cache_repository: repositories.IDbRepository) -> None:
+        self._ollama_url = config.ollama_url
+        self._model = config.model
+        self._cache_file = config.cache_file
+        self._embeddings: list[tuple[int, str]] = []
         self._cache_repository = cache_repository
-        self._item_fields = [
-            "id",
-            "genres",
-            "name",
-            "persons",
-            "short_description",
-            "description",
-            "slogan",
-            "en_name",
-        ]
 
     async def add_series(self, series_list):
         self._series_data = series_list
 
         async for batch_item_keys in self._cache_repository.get_all_item_keys():
-            items = await self._cache_repository.get_item_features(batch_item_keys, features=self._item_fields)
+            items = await self._cache_repository.get_item_features(batch_item_keys, features=self.ITEM_FIELDS)
 
             for item in items:
                 item_dict = item.model_dump(exclude_defaults=True, exclude_none=True)
                 item_text = ", ".join([f"{key}: {value}" for key, value in item_dict.items()])
 
-            # Генерируем эмбеддинг
-            embedding = self.get_embedding(series_text)
-            self._embeddings.append(embedding)
+                embedding = self.get_embedding(item_text)
+                self._embeddings.append(embedding)
 
-            # Сохраняем текст для отладки
-            series["_embedding_text"] = series_text
+                item_dict["_embedding_text"] = item_text
 
         self._embeddings = np.array(self._embeddings)
 
@@ -112,6 +114,11 @@ class CachedSeriesRecommenderRepository:
         cache_data = {"series_data": self.series_data, "embeddings": self.embeddings}
         with open(self._cache_file, "wb") as f:
             pickle.dump(cache_data, f)
+
+    def get_embedding(self, text):
+        """Получение эмбеддинга через Ollama"""
+        response = requests.post(f"{self._ollama_url}/api/embeddings", json={"model": self._model, "prompt": text})
+        return response.json()["embedding"]
 
     def load_embeddings(self):
         """Загрузка эмбеддингов из файла"""

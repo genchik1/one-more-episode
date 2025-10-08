@@ -10,7 +10,7 @@ from src.infrastructure.log import StructuredLogger, setup_logging
 
 class StoreContainer(containers.DeclarativeContainer):
     logging_setup = providers.Resource(setup_logging)
-    logger = providers.Factory(StructuredLogger, name="main")
+    logger = providers.Factory(StructuredLogger, logging_setup)
 
     kinopoisk_api_client = providers.Resource(init_kinopoisk_api, config=settings.KINOPOISK)
     redis_client = providers.Resource(init_redis_media_items, config=settings.REDIS, logger=logger)
@@ -58,9 +58,15 @@ class StoreContainer(containers.DeclarativeContainer):
     embedding_repository = providers.Singleton(
         repositories.FileEmbeddingRepository, file_path=settings.ML_CONFIG.embeddings_file
     )
-    series_recommendation_service = providers.Singleton(
-        services.SeriesRecommendationService,
+    embeddings_factory_service = providers.Singleton(
+        services.EmbeddingsFactoryService,
+        logger=logger,
         series_repository=redis_repository,
         file_embedding=embedding_repository,
+        embedding_provider=embedding_provider,
+    )
+    series_recommendation_service = providers.Singleton(
+        services.SeriesRecommendationService,
+        sembeddings_factory_service=embeddings_factory_service,
         embedding_provider=embedding_provider,
     )

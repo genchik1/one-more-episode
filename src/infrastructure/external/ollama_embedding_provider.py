@@ -2,7 +2,7 @@ import requests
 
 
 class OllamaEmbeddingProvider:
-    def __init__(self, base_url: str = "http://localhost:11434", model: str = "nomic-embed-text"):
+    def __init__(self, base_url: str, model: str):
         self.base_url = base_url
         self.model = model
 

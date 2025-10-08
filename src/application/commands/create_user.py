@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from typing import NamedTuple
 
 
-class CreateUserCommand(BaseModel):
+class CreateUserCommand(NamedTuple):
     user_id: int
     username: str

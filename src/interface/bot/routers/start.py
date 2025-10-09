@@ -49,7 +49,7 @@ def get_recommendation_keyboard() -> InlineKeyboardMarkup:
 
 @start_router.message(F.text)
 async def handle_all_messages(message: Message, container: StoreContainer) -> None:
-    stage_meta = commands.StageMetaCommand(search_query=message.text)
+    stage_meta = commands.PersonalMetaCommand(user_id=message.from_user.id)
     user_feature = UserFeatures(user_id=message.from_user.id, last_search_message=message.text)
     cache_repo: RedisRepository = await container.redis_repository()
     await cache_repo.save_user_features(user_feature)

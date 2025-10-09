@@ -3,4 +3,4 @@ from typing import NamedTuple
 
 class StageMetaCommand(NamedTuple):
     search_query: str
-    count_items: int = 5
+    count_items: int = 10

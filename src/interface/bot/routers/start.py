@@ -40,7 +40,7 @@ def get_recommendation_keyboard() -> InlineKeyboardMarkup:
     keyboard = [
         [
             InlineKeyboardButton(
-                text="Посмотреть другие", web_app=WebAppInfo(url=f"{TELEGRAM.url}{TELEGRAM.onboarding_page}")
+                text="Посмотреть другие", web_app=WebAppInfo(url=f"{TELEGRAM.url}{TELEGRAM.search_page}")
             )
         ],
     ]

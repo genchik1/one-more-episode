@@ -1,14 +1,19 @@
 from src.application.commands.like_item import LikeItemCommand
 from src.application.errors import InvalidCommandError
+from src.application.services import TelegramUserInteractionService
 from src.domain.logger import ILogger
 from src.domain.models import UserItemFeatures
 from src.domain.repositories import IDbRepository
 
 
+# FIXME сделать систему триггеров или messageBus вместо user_interaction_service, пока это костыль
 class LikeItemUseCase:
-    def __init__(self, cache_repository: IDbRepository, logger: ILogger):
+    def __init__(
+        self, cache_repository: IDbRepository, logger: ILogger, user_interaction_service: TelegramUserInteractionService
+    ) -> None:
         self._repository = cache_repository
         self._logger = logger
+        self._user_interaction_service = user_interaction_service
 
     async def execute(self, command: LikeItemCommand) -> None:
         self._logger.info(
@@ -48,6 +53,7 @@ class LikeItemUseCase:
                     user_features.disliked_series.remove(command.item_id)
             case "bookmark":
                 user_features.bookmarked_series.append(command.item_id)
+                await self._user_interaction_service.send_bookmarks(command.user_id)
             case "unbookmark":
                 if command.item_id in user_features.bookmarked_series:
                     user_features.bookmarked_series.remove(command.item_id)

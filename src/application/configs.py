@@ -32,15 +32,18 @@ def pipeline_get_onboarding_v1(logger: ILogger, cache_repository: repositories.I
     )
 
 
-def pipeline_get_search_recommendations(
+async def pipeline_get_search_recommendations(
     recommendation_service: services.SeriesRecommendationService,
     cache_repository: repositories.IDbRepository,
-    stage_meta: commands.StageMetaCommand,
+    stage_meta: commands.PersonalMetaCommand,
 ) -> Pipeline:
     features = RETURN_FEATURES
+    user_features = await cache_repository.get_user_features(stage_meta.user_id, ["last_search_message"])
+
+    new_stage_meta = commands.StageMetaCommand(search_query=user_features.last_search_message)
     return (
         Pipeline()
-        >> stages.GetSearchRecommendationsStage(recommendation_service, stage_meta)
+        >> stages.GetSearchRecommendationsStage(recommendation_service, new_stage_meta)
         >> stages.LoadItemFeaturesStage(cache_repository, features)
     )
 

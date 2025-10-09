@@ -14,6 +14,10 @@ class StoreContainer(containers.DeclarativeContainer):
 
     kinopoisk_api_client = providers.Resource(init_kinopoisk_api, config=settings.KINOPOISK)
     redis_client = providers.Resource(init_redis_media_items, config=settings.REDIS, logger=logger)
+    telegram_api_client = providers.Resource(
+        external.TelegramApiClient,
+        api_url=settings.TELEGRAM.api_url.format(token=settings.TELEGRAM.token),  # FIXME
+    )
 
     kinopoisk_repository = providers.Factory(repositories.KinopoiskRepository, kinopoisk_api_client)
     redis_repository = providers.Factory(repositories.RedisRepository, redis_client)
@@ -47,7 +51,17 @@ class StoreContainer(containers.DeclarativeContainer):
         cache_repository=redis_repository,
     )
 
-    like_item_use_case = providers.Factory(use_cases.LikeItemUseCase, cache_repository=redis_repository, logger=logger)
+    user_interaction_service = providers.Factory(
+        services.TelegramUserInteractionService,
+        client=telegram_api_client,
+        cache_repository=redis_repository,
+    )
+    like_item_use_case = providers.Factory(
+        use_cases.LikeItemUseCase,
+        cache_repository=redis_repository,
+        logger=logger,
+        user_interaction_service=user_interaction_service,
+    )
     item_features_use_case = providers.Factory(use_cases.ItemFeaturesUseCase, cache_repository=redis_repository)
     create_user_use_case = providers.Factory(use_cases.CreateUserUseCase, cache_repository=redis_repository)
 
@@ -80,8 +94,3 @@ class StoreContainer(containers.DeclarativeContainer):
         cache_repository=redis_repository,
         stage_meta=providers.Dependency(),
     )
-    telegram_api_client = providers.Resource(
-        external.TelegramApiClient,
-        api_url=settings.TELEGRAM.api_url.format(token=settings.TELEGRAM.token),  # FIXME
-    )
-    user_interaction_service = providers.Factory(services.UserInteractionService, client=telegram_api_client)

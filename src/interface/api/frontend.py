@@ -38,3 +38,8 @@ async def onboarding(request: Request, pipeline: Annotated[Pipeline, Depends(_ge
 @frontend.get("/bookmarks")
 async def bookmarks(request: Request):
     return templates.TemplateResponse("bookmarks.html", {"request": request})
+
+
+@frontend.get("/search")
+async def search(request: Request):
+    return templates.TemplateResponse("search.html", {"request": request})

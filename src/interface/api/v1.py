@@ -82,12 +82,12 @@ async def get_item(
     return item.model_dump(exclude_none=True, exclude_defaults=True)
 
 
-async def _get_collection_pipeline_depends(text: str) -> Pipeline:
-    stage_meta = commands.StageMetaCommand(search_query=text)
+async def _get_collection_pipeline_depends(user_id: int) -> Pipeline:
+    stage_meta = commands.PersonalMetaCommand(user_id=user_id)
     return await Provide[StoreContainer.get_search_recommendation_pipeline].provider(stage_meta=stage_meta)
 
 
-@router.post("/search")
+@router.get("/search/{user_id}")
 async def search(
     pipeline: Annotated[Pipeline, Depends(_get_collection_pipeline_depends)],
 ):
@@ -95,7 +95,12 @@ async def search(
         collection = await pipeline.execute()
     except PipelineError as err:
         raise HTTPException(status_code=404, detail=str(err))
-    return collection.model_dump(exclude_none=True, exclude_defaults=True)
+    series_data = [
+        item.model_dump(exclude_none=True, exclude_defaults=True)
+        for item in convert_list_items_to_frontend(collection.items)
+    ]
+
+    return {"items": series_data}
 
 
 async def _get_user_bookmarks_pipeline_depends(user_id: int) -> Pipeline:

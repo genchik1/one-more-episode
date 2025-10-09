@@ -6,9 +6,21 @@ from src.domain.models import UserFeatures
 from src.infrastructure.repositories import RedisRepository
 
 
+class TelegramUserInteractionService:
+    async def send_bookmarks(self, user_id: int) -> None:
+        pass
+
+
 @pytest.fixture
-def like_item_usecase(cache_repository: RedisRepository, logger) -> LikeItemUseCase:
-    return LikeItemUseCase(cache_repository, logger)
+def user_interaction_service():
+    return TelegramUserInteractionService()
+
+
+@pytest.fixture
+def like_item_usecase(
+    cache_repository: RedisRepository, logger, user_interaction_service: TelegramUserInteractionService
+) -> LikeItemUseCase:
+    return LikeItemUseCase(cache_repository, logger, user_interaction_service)
 
 
 async def test_save_like_action(like_item_usecase: LikeItemUseCase, cache_repository: RedisRepository):

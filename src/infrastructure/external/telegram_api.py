@@ -1,6 +1,6 @@
 from typing import Any
 
-from src.application.dtos import KpMediaItemsList
+from src.application.dtos.telegram import TgCallback, TgMessage
 from src.infrastructure.external.clients.http_base import BaseHttpClient
 
 
@@ -11,6 +11,9 @@ class TelegramApiClient:
 
     async def send_message(self, data: dict[str, Any]):
         data = await self._client.request(
-            method="POST", url=self._url + "/sendMessage", dto_model=KpMediaItemsList, payload=data
+            method="POST", url=self._url + "/sendMessage", dto_model=TgMessage, payload=data
         )
         return data
+
+    async def pinned_message(self, data: dict[str, Any]) -> None:
+        await self._client.request(method="POST", url=self._url + "/pinChatMessage", dto_model=TgCallback, payload=data)

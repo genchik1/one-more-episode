@@ -3,6 +3,10 @@ from functools import lru_cache
 from pydantic import BaseModel, Field
 
 
+class TelegramFeatures(BaseModel):
+    is_send_bookmark_message: bool = False
+
+
 class UserFeatures(BaseModel):
     user_id: int
     username: str | None = Field(default=None)
@@ -12,6 +16,8 @@ class UserFeatures(BaseModel):
     bookmarked_series: list[int] = Field(default=[])
     liked_series: list[int] = Field(default=[])
     disliked_series: list[int] = Field(default=[])
+    telegram_features: TelegramFeatures | None = Field(default=None)
+    last_search_message: str = ""
 
     @classmethod
     @lru_cache
@@ -25,6 +31,8 @@ class UserFeatures(BaseModel):
             "bookmarked_series": 6,
             "liked_series": 7,
             "disliked_series": 8,
+            "telegram_features": 9,
+            "last_search_message": 10,
         }
 
     @classmethod
